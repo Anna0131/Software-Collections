@@ -1,3 +1,19 @@
+# this script is used for running the specify docker container
+from subprocess import call, PIPE, run, Popen
+import ast, argparse, time, socket
+
+internal_port = 80
+image = None
+
+ap = argparse.ArgumentParser()
+ap.add_argument("-p", "--port", required = False) # get metric type
+ap.add_argument("-i", "--image", required = True) # specify namespace
+args = vars(ap.parse_args())
+
+image = args["image"]
+if args["port"] :
+    internal_port = ast.literal_eval((args["port"]))
+
 # check if port is not used
 def isValidPort(port):
     try:
