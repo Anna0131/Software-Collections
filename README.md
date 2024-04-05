@@ -28,5 +28,4 @@
 
 
 ## ER model
-![image](https://github.com/krixi0131/Software-Collections/assets/101371329/70848d85-8bc4-4ab0-9645-1d94460d876c)
-
+![image](https://github.com/krixi0131/Software-Collections/assets/101371329/1b36f3e4-3349-40c7-94ce-727af6673f6f)
