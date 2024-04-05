@@ -26,34 +26,33 @@ router.get('/', function(req, res) {
 
 
 //設定 POST request 的 routing，當 user 提交表單時會被觸發
-router.post('/', function(req, res) {
+router.post('/', async function(req, res) { // 注意這裡加了 async
     try {
         let suc = true;
         const account = req.body.account;
         const password = req.body.password;
-        //驗證帳號和密碼
-        const authen_result = util.loginAuthentication(account, password);//呼叫 utilities.js 中的 loginAuthentication 函數
+
+        // 使用 await 等待 Promise 解決
+        const authen_result = await util.loginAuthentication(account, password); // 加了 await
+        
         console.log(`authen_result: ${authen_result}`);
-        
-        
+
         if (authen_result == true) {
-            // 驗證成功 -> 創建一個 JWT 存在 cookie 中
             console.log("valid");
             data = {uid : "5"};
-            // JWT 的過期時間是當前時間加上 15 min
             const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, 'my_secret_key');
             res.cookie("token", token);
         }
         else {
             suc = false;
         }
-        //不管驗證是否成功，都會將 suc 的值作為 JSON 回傳給 user
+
         res.json({suc : suc});
     }
     catch (e) {
         console.log(e);
+        res.json({suc: false}); // 確保出錯時回傳失敗的訊息
     }    
 });
-
 
 module.exports = router;

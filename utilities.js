@@ -4,49 +4,43 @@ const path = require('path');
 
 // call login() function in catch.py
 module.exports = {
-    loginAuthentication: function (account, password) {
-        const spawn = require("child_process").spawn;
-        const pythonScript = path.join(__dirname, 'catch.py'); // path/to/catch.py
-        const pythonProcess = spawn('python', [pythonScript, account, password]);
-        //console.log(`catch.py path: ${pythonScript}`); C:\Users\krixi\Software_Collections\catch.py
+    loginAuthentication: function(account, password) {
+        return new Promise((resolve, reject) => { // 包裝成 Promise
+            const spawn = require("child_process").spawn;
+            const pythonScript = path.join(__dirname, 'catch.py'); // path/to/catch.py
+            const pythonProcess = spawn('python', [pythonScript, account, password]);
 
-        console.log(`account: ${account}`);
-        console.log(`password: ${password}`);
+            console.log(`account: ${account}`);
+            console.log(`password: ${password}`);
 
-        // print return value of catch.py login() function
-        pythonProcess.stdout.on('data', (data) => {
-            
-            console.log(`data.toString: ${data.toString()}`); // print the return value of catch.py login() function
-            
-            if (data.toString().trim() === 'login success') {
-                //console.log('success');
-                return true;// return true if login success
-            } else {
-                //console.log('fail');
-                return false;// return false if login fail
-            }
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(`data.toString: ${data.toString()}`);
+                if (data.toString().trim() === 'login success') {
+                    resolve(true); // 登入成功，解析 Promise 為 true
+                } else {
+                    resolve(false); // 登入失敗，解析 Promise 為 false
+                }
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                console.error(`stderr: ${data.toString()}`);
+            });
+
+            pythonProcess.on('exit', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code !== 0) {
+                    reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
+                }
+            });
+
+            pythonProcess.on('error', (err) => {
+                console.error(err);
+                reject(err); // 子進程啟動失敗
+            });
         });
-
-        // print error message
-        pythonProcess.stderr.on('data', (data) => {
-            console.error(`console.error: ${data.toString()}`);
-            return false;// return false if error
-        });
-
-        // print exit code
-        pythonProcess.on('exit', (code) => {
-            console.log(`child process exited with code ${code}`);
-            return false;// return false if exit code is not 0
-        });
-
-        // print error message
-        pythonProcess.on('error', (err) => {
-            console.error(err);
-            return false;// return false if error
-        });
-
     },
     
+    // 保持 authenToken 函數不變
     authenToken: function(token) {
         return new Promise((resolve, reject) => {
             try {
