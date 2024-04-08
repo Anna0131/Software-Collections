@@ -1,3 +1,119 @@
-<html>
-    main page
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>軟體庫-作品集系統</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f7f7f7;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .section {
+            background: #fff;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 10px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+        }
+
+        input[type=text],
+        input[type=file],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; 
+        }
+
+        input[type=submit] {
+            background: #0056b3;
+            color: #fff;
+            border: 0;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type=submit]:hover {
+            background: #004494;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #333;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p>您好，<span id="user-name">(學號_使用者)</span>！</p>
+    
+
+        <div class="section portfolio-list">
+            <h2>作品牆</h2>
+            <p>展示所有學生的作品集</p>
+        </div>
+
+        <div class="section application-form">
+            <h2>填寫申請表</h2>
+            <form action="後端URL" method="post" enctype="multipart/form-data">
+                <label for="requirement">需求說明：</label><br>
+                <textarea id="requirement" name="requirement" rows="4" cols="50"></textarea><br><br>
+    
+                <label for="portfolio">作品集檔案：</label><br>
+                <input type="file" id="portfolio" name="portfolio"><br><br>
+    
+                <input type="submit" value="提交申請">
+            </form>
+        </div>
+
+        <div class="section system-info">
+            <h2>系統使用教學</h2>
+            <p><a href="#">系統使用說明</a></p>
+            <p><a href="#">Docker相關資訊</a></p>
+        </div>
+    </div>
+</body>
 </html>
