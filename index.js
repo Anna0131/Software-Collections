@@ -1,3 +1,4 @@
+//基於 Node.js Express 的主要設定檔
 var express = require('express');
 var session = require('express-session');
 var app = express();
@@ -7,15 +8,23 @@ var jwt = require('jsonwebtoken');
 var config = require("config");
 const router = require('express').Router();
 const server = require('http').Server(app);
+
+
+//處理 session
 app.use(session({secret : 'secret', saveUninitialized: false, resave: true}));
+//bodyParser: 解析 HTTP 請求的 body
 app.use(bodyParser.urlencoded({ extended: false }));
+//express.json: 處理 JSON 資料
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser()); //解析 HTTP 請求的 cookie
+
 // routing
 app.use("/login", require("./login.js"));
 app.use("/main", require("./main.js"));
 app.use('/js', express.static('./js'));
 
+
+//建 MariaDB 設定主機名稱、使用者名稱、密碼和 DB 名稱
 const db = require("mariadb");
 const pool = db.createPool({
     trace : true,
