@@ -1,0 +1,23 @@
+<html>
+    <link href="css/login.css" rel="stylesheet"/>
+    <body>
+        <div class="container">
+        <p>您好，<span id="user_info">(學號_使用者)</span>！</p>
+        <div class="section application-form">
+            <h2>填寫申請表</h2>
+            <form action="後端URL" method="post" enctype="multipart/form-data">
+                <label for="requirement">需求說明：</label><br>
+                <textarea id="requirement" name="requirement" rows="4" cols="50"></textarea><br><br>
+    
+                <label for="portfolio">作品集檔案：</label><br>
+                <input type="file" id="portfolio" name="portfolio"><br><br>
+    
+                <input type="submit" value="提交申請">
+            </form>
+        </div>
+	</div>
+    </body>
+    <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>
+    <script src = "js/utilities.js"></script>
+    <script src = "js/apply.js"></script>
+</html>

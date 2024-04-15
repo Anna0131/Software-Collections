@@ -19,9 +19,16 @@ app.use(express.json());
 app.use(cookieParser()); //解析 HTTP 請求的 cookie
 
 // routing
-app.use("/login", require("./login.js"));
-app.use("/main", require("./main.js"));
+// pages
+app.use("/login", require("./pages/login.js"));
+app.use("/main", require("./pages/main.js"));
+app.use("/apply", require("./pages/apply.js"));
+app.use("/account", require("./pages/account.js"));
+// api
+app.use("/api/user", require("./api/user.js"));
+// static files
 app.use('/js', express.static('./js'));
+app.use('/css', express.static('./css'));
 
 
 //建 MariaDB 設定主機名稱、使用者名稱、密碼和 DB 名稱

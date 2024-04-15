@@ -20,7 +20,8 @@ def login(username, password):
     soup = BeautifulSoup(response.text, 'html.parser')
     if soup.find('div', {'class': 'alert alert-danger'}):
         return 'login failed'
-    return 'login success'
+    name = soup.find('span', {'class': 'usertext mr-1'}).encode_contents().decode().split(" ")[1] # get the name of this account, which is return by moodle
+    return name
 
 
 # 讓 util.py可以帶入username, password等參數，

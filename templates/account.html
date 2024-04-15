@@ -1,0 +1,21 @@
+<html>
+    <title>
+        帳號申請
+    </title>
+    <head>
+        <h1>帳號申請</h1>
+    </head>
+    <body>
+        <span>申請帳號的類別</span>
+	<select id = "type">
+	    <option value = "admin">admin</option>
+	    <option value = "teacher">teacher</option>
+	    <option value = "student">student</option>
+	</select>
+	<br/><span>姓名</span><input id = "name"></input>
+	<br/><span>總 credit</span><input id = "total_credit"></input>
+        <button id = 'sub' onclick = "submit()">提交</button>
+    </body>
+    <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>
+    <script src = "js/account.js"></script>
+</html>

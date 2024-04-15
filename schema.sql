@@ -1,4 +1,5 @@
-# CREATE DATABASE `software_collections`;
+CREATE DATABASE IF NOT EXISTS `software_collections`;
+USE software_collections;
 
 create table role (
     `role_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -6,37 +7,23 @@ create table role (
     PRIMARY KEY (`role_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+insert into role(name) values("admin");
+insert into role(name) values("teacher");
+insert into role(name) values("student");
+
 create table user (
     `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `role_id` int(10) NOT NULL ,
+    `name` varchar(30) NOT NULL,
+    `s_num` int(20) DEFAULT NULL,
+    `total_credit` int(10) DEFAULT 0,
     PRIMARY KEY (`user_id`) USING BTREE
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-create table admin (
-    `admin_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `user_id` int(10) NOT NULL ,
-    `total_credit` int(10) NOT NULL ,
-    PRIMARY KEY (`admin_id`) USING BTREE
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-create table teacher (
-    `teacher_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `user_id` int(10) NOT NULL ,
-    `total_credit` int(10) NOT NULL ,
-    PRIMARY KEY (`teacher_id`) USING BTREE
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-create table student (
-    `stu_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `user_id` int(10) NOT NULL ,
-    `stu_num` int(10) NOT NULL ,
-    `total_credit` int(10) NOT NULL ,
-    PRIMARY KEY (`stu_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 create table login_record (
     `login_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` int(10) NOT NULL ,
+    `suc` int(1) NOT NULL ,
     `time` datetime NOT NULL,
     PRIMARY KEY (`login_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -61,6 +48,7 @@ create table software (
     `owner_user_id` int(10) NOT NULL ,
     `topic` varchar(300) NOT NULL ,
     `description` varchar(300) NOT NULL ,
+    `domain` varchar(300) NOT NULL ,
     `avg_score` int(10) DEFAULT 0 ,
     `create_time` datetime NOT NULL,
     `success_upload` int(1) DEFAULT 0,

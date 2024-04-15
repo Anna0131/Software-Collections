@@ -15,10 +15,10 @@ module.exports = {
 
             pythonProcess.stdout.on('data', (data) => {
                 console.log(`data.toString: ${data.toString()}`);
-                if (data.toString().trim() === 'login success') {
-                    resolve(true); // 登入成功，解析 Promise 為 true
+                if (data.toString().trim() === 'login falied') {
+                    resolve(false); // 登入成功，解析 Promise 為 true
                 } else {
-                    resolve(false); // 登入失敗，解析 Promise 為 false
+                    resolve(data.toString().trim()); // 登入失敗，解析 Promise 為 false
                 }
             });
 
@@ -45,7 +45,6 @@ module.exports = {
         return new Promise((resolve, reject) => {
             try {
                 const data = jwt.verify(token, 'my_secret_key').data;
-                console.log(data);
                 if (data.uid) {
                     resolve(true);
                 } else {
@@ -53,8 +52,66 @@ module.exports = {
                 }
             } catch (error) {
                 console.error(error);
-                reject(false);
+                resolve(false);
+                //reject(false);
             }
         });
+    },
+
+    // get uid from token
+    getTokenUid : function(token) {
+        return new Promise((resolve, reject) => {
+            try {
+                const data = jwt.verify(token, 'my_secret_key').data;
+		resolve(data.uid);
+            } catch (error) {
+                console.error(error);
+                resolve(false);
+                //reject(false);
+            }
+        });
+    },
+
+    // get parent absolute path
+    getParentPath : function(dir) {
+        n_dir = "";
+        dir = dir.split("");
+        while (dir.pop() != "/") {
+            // pass
+        }
+        for (let i = 0;i < dir.length;i++) {
+            n_dir += dir[i];
+        }
+        return n_dir;
+    },
+
+    // return connection of mariadb
+    getDBConnection : async function() {
+	const db = require("mariadb");
+	try {
+            // create pool
+	    const pool = db.createPool({
+    	        host : 'localhost',
+    	        user : 'wang',
+                password : 'wang313',
+    	        database : 'software_collections'
+	    });
+	    const conn = await pool.getConnection();
+	    return conn;
+	}
+	catch(e) {
+	    console.error("error getting db connection : ", e);
+	    return null;
+	}
+    },
+
+    // close connection of mariadb
+    closeDBConnection : function(conn) {
+	try {
+	    conn.release();
+	}
+	catch(e) {
+	    console.error("error closing db connection : ", e);
+	}
     }
 };
