@@ -6,14 +6,23 @@
         <div class="section application-form">
             <h2>填寫申請表</h2>
             <form action="後端URL" method="post" enctype="multipart/form-data">
-                <label for="requirement">需求說明：</label><br>
-                <textarea id="requirement" name="requirement" rows="4" cols="50"></textarea><br><br>
-    
-                <label for="portfolio">作品集檔案：</label><br>
+                <label for="topic">主題：（必填）</label><br>
+                <input type="text" id="topic" placeholder="多人線上足球遊戲"><br><br>
+                <label for="tags">標籤：（非必填，用 、 隔開不同標籤）</label><br>
+                <input type="text" id="tags" placeholder="線上遊戲、足球"><br><br>
+                <label for="description">敘述：（必填）</label><br>
+                <textarea id="description" rows="6" cols="50" placeholder="好玩的足球遊戲，支援多人線上同時遊玩"></textarea><br><br>
+                <label for="portfolio">作品集檔案：（非必填）</label><br>
                 <input type="file" id="portfolio" name="portfolio"><br><br>
+                <label for="docker_image">Docker Image 的 user/image:tag：（非必填）</label><br>
+                <input type="text" id="docker_image"i placeholder="tommygood/online-soccer-game:latest"><br><br>
+                <label for="domain">Domain：（非必填）</label><br>
+		<input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
+                <label for="internal_port">服務在容器內架設於哪個 port：（非必填）</label><br>
+		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
     
-                <input type="submit" value="提交申請">
             </form>
+                <button id = "sub" onclick = "submit()">提交申請</button>
         </div>
 	</div>
     </body>

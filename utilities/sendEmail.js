@@ -2,7 +2,7 @@ var nodemailer = require('nodemailer');
 
 // if the gmail use the two factor authentication, then need to use the special app password on setting of https://myaccount.google.com/apppasswords
 const sender_account = "tommy50508@gmail.com";
-const sender_password = "";
+const sender_password = "yfpo wyie vbjs ruyw";
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -20,7 +20,7 @@ module.exports = {
                 from: sender_account,
                 to: receivers[i],
                 subject: subject,
-                text: text
+		html: text
             };
             // send email
             transporter.sendMail(mailOptions, function(error, info){

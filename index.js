@@ -26,6 +26,7 @@ app.use("/apply", require("./pages/apply.js"));
 app.use("/account", require("./pages/account.js"));
 // api
 app.use("/api/user", require("./api/user.js"));
+app.use("/api/software", require("./api/software.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));

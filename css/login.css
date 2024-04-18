@@ -77,3 +77,10 @@
             background: #333;
             color: white;
         }
+
+	td,tr,th{
+	    border:1px solid black;
+	    border-collapse: collapse;
+	    width : 1%;
+	    text-align : center;
+	}

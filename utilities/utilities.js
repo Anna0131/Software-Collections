@@ -2,8 +2,11 @@ const c = require('config');
 var jwt = require('jsonwebtoken');
 const path = require('path');
 
-// call login() function in catch.py
 module.exports = {
+    // shared variable
+    system_url : "http://163.22.17.184:5000",
+
+    // shared function
     loginAuthentication: function(account, password) {
         return new Promise((resolve, reject) => { // 包裝成 Promise
             const spawn = require("child_process").spawn;

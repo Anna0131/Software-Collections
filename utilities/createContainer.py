@@ -1,18 +1,20 @@
 # this script is used for running the specify docker container
 from subprocess import call, PIPE, run, Popen
-import ast, argparse, time, socket
+import ast, argparse, time, socket, sys
 
-internal_port = 80
-image = None
+#internal_port = 80
+#image = None
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--port", required = False) # get metric type
-ap.add_argument("-i", "--image", required = True) # specify namespace
-args = vars(ap.parse_args())
+#ap = argparse.ArgumentParser()
+#ap.add_argument("-p", "--port", required = False) # get metric type
+#ap.add_argument("-i", "--image", required = True) # specify namespace
+#args = vars(ap.parse_args())
+image = sys.argv[1] # docker image
+internal_port = sys.argv[2] # the port which is open in the origin service of internal container
 
-image = args["image"]
-if args["port"] :
-    internal_port = ast.literal_eval((args["port"]))
+#image = args["image"]
+#if args["port"] :
+    #internal_port = ast.literal_eval((args["port"]))
 
 # check if port is not used
 def isValidPort(port):
@@ -31,7 +33,7 @@ def isValidPort(port):
 
 def selectPort() :
     # vaild port range
-    port_start = "5000"
+    port_start = "5010"
     port_end = "60000"
     # find free port
     for i in range(int(port_start), int(port_end)) :

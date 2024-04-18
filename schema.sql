@@ -15,6 +15,7 @@ create table user (
     `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `role_id` int(10) NOT NULL ,
     `name` varchar(30) NOT NULL,
+    `email` varchar(30) DEFAULT NULL,
     `s_num` int(20) DEFAULT NULL,
     `total_credit` int(10) DEFAULT 0,
     PRIMARY KEY (`user_id`) USING BTREE
@@ -49,21 +50,26 @@ create table software (
     `topic` varchar(300) NOT NULL ,
     `description` varchar(300) NOT NULL ,
     `domain` varchar(300) NOT NULL ,
+    `docker_image` varchar(300) NOT NULL ,
     `avg_score` int(10) DEFAULT 0 ,
     `create_time` datetime NOT NULL,
     `success_upload` int(1) DEFAULT 0,
+    `internal_port` int(5) DEFAULT NULL,
+    `external_port` int(5) DEFAULT NULL,
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*
 create table tag_type (
     `tt_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` varchar(100) NOT NULL ,
     PRIMARY KEY (`tt_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+*/
 
 create table tag (
     `tag_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `tt_id` int(10) NOT NULL ,
     `software_id` int(10) NOT NULL ,
+    `name` varchar(100) NOT NULL ,
     PRIMARY KEY (`tag_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
