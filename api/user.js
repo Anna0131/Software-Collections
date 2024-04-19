@@ -114,4 +114,28 @@ router.get('/specify', async function(req, res) {
     }
 });
 
+// get headshot of current user
+router.get('/headshot', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    let user_id = req.query.user_id; // get user id from query string
+	    const current_user_id = await util.getTokenUid(req.cookies.token);
+	    if (user_id == "null") {
+		// if user_id equal to null, try to get the user id from cookies, which means show the info of themsevles
+		user_id = current_user_id
+	    }
+	    //res.sendFile(util.getParentPath(__dirname) + `/media/user_id${user_id}/default.png`);
+	    res.sendFile(util.getParentPath(__dirname) + `/media/default.png`);
+        }
+        else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "login failed"});
+    }
+});
+
 module.exports = router;

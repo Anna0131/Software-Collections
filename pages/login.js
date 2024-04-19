@@ -1,6 +1,6 @@
 // Required modules
 const router = require('express').Router();
-var util = require("./../utilities/utilities.js");
+const util = require("./../utilities/utilities.js");
 var jwt = require('jsonwebtoken');
 
 async function insertUser(account, name) {
