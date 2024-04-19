@@ -19,21 +19,10 @@ function createContainer(docker_image, internal_port) {
     const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port]);
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
-            pythonProcess.stdout.on('data', (data) => {
-		if (index++ != 0) {
-                    console.log(`returning data of creating container: ${data.toString()}`);
-		    const create_suc = data.toString().split("||")[0];
-		    const external_port = data.toString().split("||")[1].split('\n')[0];
-                    if (create_suc === "true") {
-                        resolve([true, external_port]); // create container successfully, return the external port which the service is deployed on it
-                    } else {
-                        resolve([false, external_port]); // failed to create container, return the error msg
-                    }
-		}
-            });
 
             pythonProcess.stderr.on('data', (data) => {
                 console.error(`stderr: ${data.toString()}`);
+                resolve([false, data.toString()]); // failed to create container, return the error msg
             });
 
             pythonProcess.on('exit', (code) => {
@@ -46,6 +35,20 @@ function createContainer(docker_image, internal_port) {
             pythonProcess.on('error', (err) => {
                 console.error(err);
                 reject(err); // 子進程啟動失敗
+            });
+
+            pythonProcess.stdout.on('data', (data) => {
+		if (index++ != 0) {
+                    console.log(`returning data of creating container: ${data.toString()}`);
+		    const create_suc = data.toString().split("||")[0];
+		    const external_port = data.toString().split("||")[1].split('\n')[0];
+                    if (create_suc === "true") {
+                        resolve([true, external_port]); // create container successfully, return the external port which the service is deployed on it
+                    } 
+		    else {
+                        resolve([false, external_port]); // failed to create container, return the error msg
+                    }
+		}
             });
 	});
 }
@@ -63,7 +66,7 @@ router.get('/', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 		//softwares = await conn.query("select * from software where success_upload = 1;");
-		softwares = await conn.query("select s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name from software as s, user as u where s.success_upload = 1 and u.user_id = s.owner_user_id;"); // return the necessary data which will be display on the page of main
+		softwares = await conn.query("select s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.user_id from software as s, user as u where s.success_upload = 1 and u.user_id = s.owner_user_id;"); // return the necessary data which will be display on the page of main
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
@@ -113,7 +116,6 @@ router.get('/agreement', async function(req, res) {
 	    // pull app image from docker hub, and create the container on the docker server
 	    try {
 		const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port);
-		console.log(container_create);
 		if (container_create[0] == false) {
 		    // failed to create container, return the error msg
 		    res.json({msg : "failed to create container : " + container_create[1]}); 
@@ -138,7 +140,8 @@ router.get('/agreement', async function(req, res) {
 		    // send the email to inform the agreement of project to the person who applied this project
 		    informApplicant(external_port, software_id);
 		    
-	    	    res.json({suc : "true", external_port});
+	    	    //res.json({suc : "true", external_port});
+		    res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/main';</script>");
 		}
 	    }
 	    catch (e) {
@@ -147,12 +150,12 @@ router.get('/agreement', async function(req, res) {
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+	    res.redirect("/login");
         }
     }
     catch(e) {
         console.log(e);
-        res.json({msg : "login failed"});
+	res.redirect("/login");
     }
 });
 

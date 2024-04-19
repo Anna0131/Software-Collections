@@ -22,6 +22,7 @@ app.use(cookieParser()); //解析 HTTP 請求的 cookie
 // pages
 app.use("/login", require("./pages/login.js"));
 app.use("/main", require("./pages/main.js"));
+app.use("/user", require("./pages/user.js"));
 app.use("/apply", require("./pages/apply.js"));
 app.use("/account", require("./pages/account.js"));
 // api

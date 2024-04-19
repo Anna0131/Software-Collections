@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>軟體庫-作品集系統</title>
+    <title>使用者-作品集系統</title>
 </head>
 <body>
     <div class="container">
@@ -12,18 +12,27 @@
     
 
         <div class="section portfolio-list">
-            <h2>作品牆</h2>
-            <p>展示所有學生的作品集</p>
-	    <table border = "1" id = "tab_software_collections">
+            <h2>使用者個人資訊</h2>
+	    <table border = "1" id = "tab_user_info">
 		<tr>
-		    <td>作品編號</td>
-		    <td>主題</td>
-		    <td>介紹</td>
-		    <td>建立者</td>
-		    <td>url</td>
-		    <td>域名</td>
-		    <td>建立時間</td>
+		    <td>編號</td>
+		    <td>學號</td>
+		    <td>名稱</td>
+		    <td>email</td>
+		    <td>總 credit</td>
 	    </table>
+        </div>
+
+        <div class="section portfolio-list" id = "section_update_info" style = "display:none;">
+            <h2>更新個人資訊</h2>
+	    <div>
+		email：<input id = "email"></input>
+		<button id = "button_email">送出</button>
+	    </div>
+	    <br/>
+	    <div>
+	        照片：<input type="file" id = "headshot"></input>
+	    </div>
         </div>
 
         <div class="section system-info">
@@ -35,5 +44,5 @@
 </body>
 <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>
 <script src = "js/utilities.js"></script>
-<script src = "js/main.js"></script>
+<script src = "js/user.js"></script>
 </html>

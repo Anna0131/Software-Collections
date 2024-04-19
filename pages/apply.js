@@ -46,12 +46,12 @@ router.get('/', async function(req, res) {
     	    res.sendFile(util.getParentPath(__dirname) + '/templates/apply.html');  //回應靜態文件
         }
         else {
-            res.json({msg : "login failed"});
+	    res.redirect("/login");
         }
     }
     catch(e) {
         console.log(e);
-        res.json({msg : "login failed"});
+	res.redirect("/login");
     }
     return;
 });

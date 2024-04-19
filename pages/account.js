@@ -15,7 +15,7 @@ router.get('/', async function(req, res) {
     }
     catch(e) {
         console.log(e);
-        res.json({msg : "login failed"});
+	res.redirect("/login");
     }
 });
 
