@@ -31,7 +31,7 @@ async function showSpecifyUserInfo() {
 	    "<tr/><td/>"+ data.user_id +  
 	    "<td>" + data.s_num + "</td>" +
 	    "<td>" + data.name + "</td>" +
-	    "<td>" + data.email + "</td>" +
+	    "<td>" + `<a href="mailto:${data.email}">${data.email}</a>` + "</td>" +
 	    "<td>" + data.total_credit + "</td>" +
 	    "</tr>";
 	// if users query the data of themselves, then display the table which users can setting the info
@@ -46,6 +46,42 @@ async function showSpecifyUserInfo() {
     }
 }
 
+// update the headshot
+async function postHeadshot() {
+    // post headshot
+    const formData = new FormData();
+    const imagefile = document.querySelector('#headshot_upload');
+    formData.append("image", imagefile.files[0]);
+    const result = await axios.post('/api/user/headshot', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    
+    console.log(result.data);
+    if (result.data.suc == true) {
+	// successfully update headshot
+	alert("更新照片成功");
+    }
+    else {
+	alert("更新照片失敗", result.data.msg);
+    }
+}
+
+// update the email
+async function postEmail() {
+    const email = document.getElementById("email_upload").value;
+    data = {email};
+    let result = await axios.post('/api/user/email', data);
+    result = result.data;
+    console.log(result);
+    if (result.suc == true) {
+	alert("更新 email 成功");
+    }
+    else {
+	alert("更新 email 失敗" + result.msg);
+    }
+}
 
 setUserInfo();
 showSpecifyUserInfo();

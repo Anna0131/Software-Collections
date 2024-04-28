@@ -13,7 +13,7 @@
 
         <div class="section portfolio-list">
             <h2>使用者個人資訊</h2>
-	    <img id = "headshot" src = ""/>
+	    <img style = "width:10%;" id = "headshot" src = ""/>
 	    <table border = "1" id = "tab_user_info">
 		<tr>
 		    <td>編號</td>
@@ -27,13 +27,13 @@
         <div class="section portfolio-list" id = "section_update_info" style = "display:none;">
             <h2>更新個人資訊</h2>
 	    <div>
-		email：<input id = "email"></input>
-		<button id = "button_email">送出</button>
+		email：<input id = "email_upload"></input>
+		<button id = "button_email" onclick="postEmail()">送出</button>
 	    </div>
 	    <br/>
 	    <div>
-	        照片：<input type="file" id = "headshot"></input>
-		<button id = "button_headshot">送出</button>
+	        照片：<input name = "headshot_upload" type="file" id = "headshot_upload"></input>
+		<button id = "button_headshot" onclick="postHeadshot()">送出</button>
 	    </div>
         </div>
 

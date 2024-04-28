@@ -1,6 +1,7 @@
 // Required modules
 const router = require("express").Router();
 const util = require("./../utilities/utilities.js");
+const fs = require("fs");
 
 // processing request
 
@@ -125,8 +126,14 @@ router.get('/headshot', async function(req, res) {
 		// if user_id equal to null, try to get the user id from cookies, which means show the info of themsevles
 		user_id = current_user_id
 	    }
-	    //res.sendFile(util.getParentPath(__dirname) + `/media/user_id${user_id}/default.png`);
-	    res.sendFile(util.getParentPath(__dirname) + `/media/default.png`);
+	    if (fs.existsSync(util.getParentPath(__dirname) + `/media/user_id_${user_id}/headshot.png`)) {
+		// headshot of current user is existed
+	    	res.sendFile(util.getParentPath(__dirname) + `/media/user_id_${user_id}/headshot.png`);
+	    }
+	    else {
+		// send the default headshot if the user's headshot does not exist
+	    	res.sendFile(util.getParentPath(__dirname) + `/media/default.png`);
+	    }
         }
         else {
             res.json({msg : "login failed"});
@@ -138,4 +145,66 @@ router.get('/headshot', async function(req, res) {
     }
 });
 
+// post headshot of current user
+router.post('/headshot', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const headshot = req.files.image;
+	    let suc = false; // whether have set the image of headshot successfully
+	    if (headshot != undefined) {
+	        const headshot_temp_path = headshot.tempFilePath; // path of temp file uploaded by user
+		const headshot_path = util.getParentPath(__dirname) + `/media/user_id_${user_id}/headshot.png`; // the path which actually store img of headshot
+		try {
+		    fs.copyFileSync(headshot_temp_path, headshot_path);
+		    suc = true;
+		}
+		catch (e) {
+		    console.log(e);
+		}
+		fs.unlinkSync(headshot_temp_path); // remove the temp file
+	    }
+	    res.json({suc});
+        }
+        else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "login failed"});
+    }
+});
+
+// post email of current user
+router.post('/email', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    let conn;
+	    try {
+	    	conn = await util.getDBConnection(); // get connection from db
+	    	const user_id = await util.getTokenUid(req.cookies.token);
+		const email = req.body.email;
+	    	await conn.query("update user set email = ? where user_id = ?;", [email, user_id]);
+		res.json({suc : true});
+	    }
+	    catch(e) {
+		console.error(e);
+		res.json({suc : false, msg : "db error"});
+	    }
+	    finally {
+		util.closeDBConnection(conn); // close db connection
+	    }
+        }
+        else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "login failed"});
+    }
+});
 module.exports = router;

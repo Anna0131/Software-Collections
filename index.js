@@ -4,6 +4,7 @@ var session = require('express-session');
 var app = express();
 var bodyParser = require("body-parser");
 var cookieParser = require('cookie-parser');
+var fileupload = require("express-fileupload");
 var jwt = require('jsonwebtoken');
 var config = require("config");
 const router = require('express').Router();
@@ -17,6 +18,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //express.json: 處理 JSON 資料
 app.use(express.json());
 app.use(cookieParser()); //解析 HTTP 請求的 cookie
+// 處理上傳的 file
+// Use temp files instead of memory for managing the upload process.
+app.use(fileupload({
+    useTempFiles : true,
+    tempFileDir : '/tmp/'
+}));
 
 // routing
 // pages
