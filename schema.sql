@@ -32,7 +32,9 @@ create table login_record (
 create table requirement (
     `req_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` int(10) NOT NULL ,
-    `awarded_credit` varchar(30) NOT NULL ,
+    `topic` varchar(300) NOT NULL ,
+    `description` varchar(600) NOT NULL ,
+    `awarded_credit` int(10) DEFAULT 0 ,
     `time` datetime NOT NULL,
     PRIMARY KEY (`req_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -48,7 +50,7 @@ create table software (
     `software_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `owner_user_id` int(10) NOT NULL ,
     `topic` varchar(300) NOT NULL ,
-    `description` varchar(300) NOT NULL ,
+    `description` varchar(600) NOT NULL ,
     `domain` varchar(300) NOT NULL ,
     `docker_image` varchar(300) NOT NULL ,
     `avg_score` int(10) DEFAULT 0 ,

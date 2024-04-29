@@ -32,9 +32,11 @@ app.use("/main", require("./pages/main.js"));
 app.use("/user", require("./pages/user.js"));
 app.use("/apply", require("./pages/apply.js"));
 app.use("/account", require("./pages/account.js"));
+app.use("/requirement", require("./pages/requirement.js"));
 // api
 app.use("/api/user", require("./api/user.js"));
 app.use("/api/software", require("./api/software.js"));
+app.use("/api/requirement", require("./api/requirement.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));
