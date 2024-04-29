@@ -38,6 +38,7 @@ app.use("/api/software", require("./api/software.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));
+app.use('/public', express.static('./media/public'));
 
 
 //建 MariaDB 設定主機名稱、使用者名稱、密碼和 DB 名稱

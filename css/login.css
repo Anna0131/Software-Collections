@@ -11,6 +11,7 @@
         .container {
             width: 80%;
             margin: 20px auto;
+	    margin-left:15%
         }
 
         header {
