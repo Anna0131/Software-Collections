@@ -85,3 +85,11 @@
 	    width : 1%;
 	    text-align : center;
 	}
+
+	#side-bar {
+	    width : 10%;
+	}
+
+	iframe {
+	    width : 100%;
+	}

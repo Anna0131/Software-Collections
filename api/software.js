@@ -1,9 +1,17 @@
 // Required modules
 const router = require("express").Router();
 const util = require("./../utilities/utilities.js");
+const sendEmail = require("./../utilities/sendEmail.js");
 
-function informApplicant(external_port, software_id) {
+function informApplicant(external_port, software_id, user_info) {
     // send the email to inform the agreement of project to the person who applied this project
+    const new_line = "<br/>";
+    const software_url = util.getUrlRoot(util.system_url) + ':' + external_port;
+    const receivers = [user_info.email];
+    const topic = "軟體庫系統通知 - 申請成功通過";
+    let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
+    content += `此軟體已部屬於：${software_url}`;
+    sendEmail.send(receivers, topic, content);
 }
 
 function ckUserPrivileges(user_id) {
@@ -125,9 +133,12 @@ router.get('/agreement', async function(req, res) {
 		    // return the external port which the service is deployed on it, and update to the data in db
 
 		    const external_port = container_create[1];
+		    let user_info;
 	    	    try {
 	    		conn = await util.getDBConnection(); // get connection from db
 	    		await conn.query("update software set external_port = ? where software_id = ?;", [external_port, software_id]);
+			// get the info of user to send back the email
+			user_info = await conn.query("select * from user where user_id = ?", user_id);
 	    	    }
 	    	    catch(e) {
 			console.error(e);
@@ -138,7 +149,7 @@ router.get('/agreement', async function(req, res) {
 	    	    }
 		    
 		    // send the email to inform the agreement of project to the person who applied this project
-		    informApplicant(external_port, software_id);
+		    informApplicant(external_port, software_id, user_info[0]);
 		    
 	    	    //res.json({suc : "true", external_port});
 		    res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/main';</script>");

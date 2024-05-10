@@ -13,11 +13,11 @@ module.exports = {
             const pythonScript = path.join(__dirname, 'catch.py'); // path/to/catch.py
             const pythonProcess = spawn('python', [pythonScript, account, password]);
 
-            console.log(`account: ${account}`);
-            console.log(`password: ${password}`);
+            //console.log(`account: ${account}`);
+            //console.log(`password: ${password}`);
 
             pythonProcess.stdout.on('data', (data) => {
-                console.log(`data.toString: ${data.toString()}`);
+                //console.log(`data.toString: ${data.toString()}`);
                 if (data.toString().trim() === 'login falied') {
                     resolve(false); // 登入成功，解析 Promise 為 true
                 } else {
@@ -116,5 +116,10 @@ module.exports = {
 	catch(e) {
 	    console.error("error closing db connection : ", e);
 	}
+    },
+
+    // get the root of url
+    getUrlRoot : function(url) {
+        return url.split(":")[0] + ":" + url.split(":")[1];
     }
 };

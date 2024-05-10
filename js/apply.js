@@ -12,7 +12,8 @@ async function postApplyInfo() {
     result = result.data;
     console.log(result);
     if (result.suc == true) {
-	alert("申請已成功送出");
+	alert("申請已成功送出，若成功會再寄信告知");
+	window.location.href = "/main";
     }
     else {
 	alert("申請無法正確送出" + result.msg);
