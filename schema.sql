@@ -58,6 +58,15 @@ create table software (
     `success_upload` int(1) DEFAULT 0,
     `internal_port` int(5) DEFAULT NULL,
     `external_port` int(5) DEFAULT NULL,
+    `view_nums` int(10) DEFAULT 0,
+    PRIMARY KEY (`software_id`) USING BTREE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+create table bulletin (
+    `software_id` int(10) UNSIGNED NOT NULL,
+    `comment_user_id` int(10) NOT NULL ,
+    `content` varchar(600) NOT NULL ,
+    `create_time` datetime NOT NULL,
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

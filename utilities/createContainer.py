@@ -45,7 +45,7 @@ def main(internal_port, image) :
     # select free external port
     external_port = selectPort()
     # run docker container
-    cmd = "sudo docker run -p %s:%s -d %s" % (external_port, internal_port, image)
+    cmd = "sudo docker run --name %s -p %s:%s -d %s" % (external_port, external_port, internal_port, image)
     #print(cmd)
     result = Popen(cmd, shell=True)
     streamdata = result.communicate()[0]

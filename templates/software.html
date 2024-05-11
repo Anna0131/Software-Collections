@@ -26,35 +26,40 @@
     
 
         <div class="section portfolio-list">
-            <h2>作品牆</h2>
-            <p>展示所有學生的作品集</p>
-	    <table border = "1" id = "tab_software_collections">
+            <h2>軟體資訊</h2>
+	    <table border = "1" id = "software_info">
 		<tr>
 		    <td>作品編號</td>
 		    <td>主題</td>
+		    <td>介紹</td>
 		    <td>建立者</td>
+		    <td>url</td>
+		    <td>域名</td>
+		    <td>建立時間</td>
 		    <td>瀏覽次數</td>
-		    <td>詳細資訊</td>
 	    </table>
-        </div>
+	</div>
 
         <div class="section portfolio-list">
-            <h2>我的作品牆</h2>
-            <p>展示個人的作品集</p>
-	    <table border = "1" id = "tab_my_software_collections">
+            <h2>留言板</h2>
+	    <table border = "1" id = "bulletin">
 		<tr>
 		    <td>作品編號</td>
-		    <td>主題</td>
-		    <td>申請成功</td>
-		    <td>瀏覽次數</td>
-		    <td>詳細資訊</td>
-		    <td>刪除</td>
+		    <td>內容</td>
+		    <td>留言者</td>
+		    <td>留言時間</td>
 	    </table>
+            <h2>新增留言</h2>
+	    <div>
+		留言：<input id = "comment"></input>
+		<button onclick="postComment()">送出</button>
+	    </div>
+	    <br/>
         </div>
 
     </div>
 </body>
 <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>
 <script src = "js/utilities.js"></script>
-<script src = "js/main.js"></script>
+<script src = "js/software.js"></script>
 </html>

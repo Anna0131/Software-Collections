@@ -35,3 +35,24 @@ async function setUserInfo() {
 	user_info.innerHTML = result.name;
     }
 }
+
+function lessTime(times) { // 把時間弄得好看一點
+    if (times == null) // 如果還沒有時間
+        return null;
+    let new_time = '';
+    let dash_is_breaked = false; // 只要把第一個 dash 換行，因為是年分
+    for (let i = 0;i < times.length-5;i++) { // 不要後面五個字元
+	if (times[i] == '-' && !dash_is_breaked) {
+            new_time += '-';
+            dash_is_breaked = true;
+            continue;
+        }
+        if (times[i] == 'T') { // 把 T 換掉
+            new_time += ' ';
+            continue;
+        }
+        new_time += times[i];
+    }
+    return new_time;
+}
+

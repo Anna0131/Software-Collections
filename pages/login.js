@@ -1,14 +1,14 @@
 // Required modules
 const router = require('express').Router();
 const util = require("./../utilities/utilities.js");
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 async function insertUser(account, name) {
     // return uid of account and insert into user table if this account not existed
 	    let conn;
+	    let user_id;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-		let user_id;
 	    	let user = await conn.query("select * from user where s_num = ?;", account);
 		// account not existed
 		if (user.length == 0) {
@@ -33,7 +33,6 @@ async function insertUser(account, name) {
 		else {
 		    user_id = user[0].user_id;
 		}
-		return user_id.toString();
 	    }
 	    catch(e) {
 		console.error(e);
@@ -42,12 +41,12 @@ async function insertUser(account, name) {
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
+		return user_id.toString();
 	    }
-    
 }
 
 //設定一個 HTTP GET 請求的路由處理 -> 前往根 URL（ '/'）會被觸發
-router.get('/', function(req, res) {
+router.get('/', async function(req, res) {
     res.sendFile(util.getParentPath(__dirname) + '/templates/login.html');  //回應靜態文件
     return;
 });
@@ -61,12 +60,12 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
         const password = req.body.password;
 
         const authen_result = await util.loginAuthentication(account, password);
-        if (authen_result != false) {
+        if (authen_result != "login failed") {
 	    // login successfully
 	    const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
-            console.log("valid", user_id);
+            //console.log("valid", user_id, authen_result);
             data = {uid : user_id};
-            const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, 'my_secret_key');
+            const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
             res.cookie("token", token);
         }
         else {

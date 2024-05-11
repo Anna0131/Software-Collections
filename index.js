@@ -34,6 +34,7 @@ app.use("/apply", require("./pages/apply.js"));
 app.use("/account", require("./pages/account.js"));
 app.use("/requirement", require("./pages/requirement.js"));
 app.use("/tutorial", require("./pages/tutorial.js"));
+app.use("/software", require("./pages/software.js"));
 // api
 app.use("/api/user", require("./api/user.js"));
 app.use("/api/software", require("./api/software.js"));

@@ -1,10 +1,22 @@
 const c = require('config');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const path = require('path');
+const jwt_key = "goodjwtkey";
+const system_url = "http://163.22.17.184:5000";
+const db = require("mariadb");
+// create pool
+const pool = db.createPool({
+    connectionLimit : 500,
+    host : 'localhost',
+    user : 'wang',
+    password : 'wang313',
+    database : 'software_collections'
+});
 
 module.exports = {
     // shared variable
-    system_url : "http://163.22.17.184:5000",
+    system_url,
+    jwt_key,
 
     // shared function
     loginAuthentication: function(account, password) {
@@ -17,11 +29,11 @@ module.exports = {
             //console.log(`password: ${password}`);
 
             pythonProcess.stdout.on('data', (data) => {
-                //console.log(`data.toString: ${data.toString()}`);
-                if (data.toString().trim() === 'login falied') {
-                    resolve(false); // 登入成功，解析 Promise 為 true
+		data = data.toString().slice(0, -1); // remove the last char 
+                if (data === 'login falied') {
+                    resolve(false); // 登入失敗，解析 Promise 為 True
                 } else {
-                    resolve(data.toString().trim()); // 登入失敗，解析 Promise 為 false
+                    resolve(data.toString().trim()); // 登入成功
                 }
             });
 
@@ -30,7 +42,7 @@ module.exports = {
             });
 
             pythonProcess.on('exit', (code) => {
-                console.log(`child process exited with code ${code}`);
+                //console.log(`child process exited with code ${code}`);
                 if (code !== 0) {
                     reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
                 }
@@ -47,7 +59,7 @@ module.exports = {
     authenToken: function(token) {
         return new Promise((resolve, reject) => {
             try {
-                const data = jwt.verify(token, 'my_secret_key').data;
+                const data = jwt.verify(token, jwt_key).data;
                 if (data.uid) {
                     resolve(true);
                 } else {
@@ -65,7 +77,7 @@ module.exports = {
     getTokenUid : function(token) {
         return new Promise((resolve, reject) => {
             try {
-                const data = jwt.verify(token, 'my_secret_key').data;
+                const data = jwt.verify(token, jwt_key).data;
 		resolve(data.uid);
             } catch (error) {
                 console.error(error);
@@ -90,15 +102,7 @@ module.exports = {
 
     // return connection of mariadb
     getDBConnection : async function() {
-	const db = require("mariadb");
 	try {
-            // create pool
-	    const pool = db.createPool({
-    	        host : 'localhost',
-    	        user : 'wang',
-                password : 'wang313',
-    	        database : 'software_collections'
-	    });
 	    const conn = await pool.getConnection();
 	    return conn;
 	}
