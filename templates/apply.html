@@ -6,12 +6,7 @@
 	        <img src = "/public/logo.jpg" style = "margin-left:3%;width:100%" />
 	    </a>
 	    <br/>
-	    <ul>
-	        <li><a href = "/main">main</a></li>
-	        <li><a href = "/user">user</a></li>
-	        <li><a href = "/apply">apply</a></li>
-	        <li><a href = "/account">account</a></li>
-	        <li><a href = "/requirement">requirement</a></li>
+	    <ul id = "ref_list">
 	    </ul>
         </div>
         <div class="container">
@@ -31,6 +26,10 @@
                 <input type="text" id="docker_image"i placeholder="tommygood/online-soccer-game:latest"><br><br>
                 <label for="domain">Domain：（非必填）</label><br>
 		<input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
+                <label for="internal_port">服務在容器內架設於哪個 port：（若有 Docker Image 則必填）</label><br>
+		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
+                <label for="memory_usage">容器記憶體使用量：（若有 Docker Image 則必填）</label><br>
+		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
                 <label for="internal_port">服務在容器內架設於哪個 port：（若有 Docker Image 則必填）</label><br>
 		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
     

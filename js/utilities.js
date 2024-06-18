@@ -56,3 +56,25 @@ function lessTime(times) { // 把時間弄得好看一點
     return new_time;
 }
 
+async function getAllRefs() {
+    // get all references
+    let result = await axios.get('/api/refs');
+    return result.data.refs_name;
+}
+
+async function setRefs() {
+    let ref_list = document.getElementById("ref_list");
+
+    // get all references
+    const all_refs = await getAllRefs();
+
+    for (let i = 0;i < all_refs.length;i++) {
+        let li_element = document.createElement("li");
+	let a_element = document.createElement("a");
+	a_element.href = all_refs[i].name;
+	a_element.innerHTML = all_refs[i].name;
+	li_element.appendChild(a_element);
+	ref_list.appendChild(li_element);
+    }
+}
+

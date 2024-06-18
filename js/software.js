@@ -107,3 +107,4 @@ async function postComment() {
 setUserInfo();
 showSoftwareCollections();
 showBulletin();
+setRefs();

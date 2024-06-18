@@ -207,4 +207,5 @@ router.post('/email', async function(req, res) {
         res.json({msg : "login failed"});
     }
 });
+
 module.exports = router;

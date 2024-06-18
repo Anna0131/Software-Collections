@@ -100,3 +100,4 @@ async function showMySoftwareCollections() {
 setUserInfo();
 showSoftwareCollections();
 showMySoftwareCollections();
+setRefs();

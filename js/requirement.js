@@ -59,3 +59,4 @@ async function postApplyInfo() {
 }
 setUserInfo();
 showRequirements();
+setRefs();

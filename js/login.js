@@ -3,7 +3,7 @@ async function submit() {
     const password = document.getElementById("password").value;
     console.log(account, password);
     data = {account : account, password : password};
-    let suc_login = await axios.post('/login', data);
+    let suc_login = await axios.post('/api/login', data);
     suc_login = suc_login.data;
 	console.log(suc_login);
     if (suc_login.suc) {

@@ -66,6 +66,8 @@ async function postHeadshot() {
     else {
 	alert("更新照片失敗", result.data.msg);
     }
+    // reload the page to refresh the new data
+    window.location.reload();
 }
 
 // update the email
@@ -81,7 +83,10 @@ async function postEmail() {
     else {
 	alert("更新 email 失敗" + result.msg);
     }
+    // reload the page to refresh the new data
+    window.location.reload();
 }
 
 setUserInfo();
 showSpecifyUserInfo();
+setRefs();

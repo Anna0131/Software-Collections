@@ -7,10 +7,6 @@ create table role (
     PRIMARY KEY (`role_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-insert into role(name) values("admin");
-insert into role(name) values("teacher");
-insert into role(name) values("student");
-
 create table user (
     `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `role_id` int(10) NOT NULL ,
@@ -55,10 +51,13 @@ create table software (
     `docker_image` varchar(300) NOT NULL ,
     `avg_score` int(10) DEFAULT 0 ,
     `create_time` datetime NOT NULL,
-    `success_upload` int(1) DEFAULT 0,
-    `internal_port` int(5) DEFAULT NULL,
-    `external_port` int(5) DEFAULT NULL,
+    `success_upload` boolean DEFAULT FALSE,
+    `internal_port` int(5) NULL,
+    `external_port` int(5) NULL,
     `view_nums` int(10) DEFAULT 0,
+    `memory` int(5) NULL ,
+    `storage` float(3) NULL ,
+    `cpu` float(3) NULL,
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -84,3 +83,21 @@ create table tag (
     `name` varchar(100) NOT NULL ,
     PRIMARY KEY (`tag_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+create table ref (
+    `ref_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` varchar(100) NOT NULL ,
+    `root_only` boolean NOT NULL,
+    PRIMARY KEY (`ref_id`) USING BTREE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+insert into role(name) values("admin");
+insert into role(name) values("teacher");
+insert into role(name) values("student");
+
+insert into ref(name, root_only) values("main", FALSE);
+insert into ref(name, root_only) values("user", FALSE);
+insert into ref(name, root_only) values("apply", FALSE);
+insert into ref(name, root_only) values("requirement", FALSE);
+insert into ref(name, root_only) values("account", TRUE);
+insert into ref(name, root_only) values("toturial", FALSE);

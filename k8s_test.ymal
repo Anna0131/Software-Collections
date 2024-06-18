@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubernetes-demo-pod-1
+  labels:
+    app: demoApp
+spec:
+  containers:
+    - name: kubernetes-demo-container-1
+      image: hcwxd/purple-whale
+      ports:
+        - containerPort: 3000

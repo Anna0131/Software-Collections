@@ -18,6 +18,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //express.json: 處理 JSON 資料
 app.use(express.json());
 app.use(cookieParser()); //解析 HTTP 請求的 cookie
+
+// cors
+cors = require('cors');
+app.use(cors());
+
 // 處理上傳的 file
 // Use temp files instead of memory for managing the upload process.
 app.use(fileupload({
@@ -39,6 +44,8 @@ app.use("/software", require("./pages/software.js"));
 app.use("/api/user", require("./api/user.js"));
 app.use("/api/software", require("./api/software.js"));
 app.use("/api/requirement", require("./api/requirement.js"));
+app.use("/api/refs", require("./api/refs.js"));
+app.use("/api/login", require("./api/login.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));
