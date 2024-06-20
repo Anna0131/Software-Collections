@@ -28,5 +28,16 @@ async function submit() {
     postApplyFile(); // post the file
 }
 
+// set container info based on the checkbox value
+function setContainerInfo() {
+    const container_info = document.getElementById("container_info");
+    if (container_info.style.display == "block") {
+        container_info.style.display = "none";
+    }
+    else {
+        container_info.style.display = "block";
+    }
+}
+
 setUserInfo();
 setRefs();

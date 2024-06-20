@@ -87,17 +87,31 @@ module.exports = {
         });
     },
 
-    // get parent absolute path
+     // get parent absolute path
     getParentPath : function(dir) {
-        n_dir = "";
-        dir = dir.split("");
-        while (dir.pop() != "/") {
-            // pass
+        try {
+            n_dir = "";
+            dir = dir.split("");
+            // determine the type of slash, which will be different between windows and linux
+            if (dir.includes("/")) {
+                slash_type = "/";
+            }
+            else {
+                slash_type = "\\";
+            }
+            // pop the last one directory
+            while (dir.pop() != "\\") {
+                // pass
+            }
+            // restructure the full path
+            for (let i = 0;i < dir.length;i++) {
+                n_dir += dir[i];
+            }
+            return n_dir;
         }
-        for (let i = 0;i < dir.length;i++) {
-            n_dir += dir[i];
+        catch(e) {
+            console.log(e);
         }
-        return n_dir;
     },
 
     // return connection of mariadb

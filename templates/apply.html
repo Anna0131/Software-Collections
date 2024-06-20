@@ -22,16 +22,22 @@
                 <textarea id="description" rows="6" cols="50" placeholder="好玩的足球遊戲，支援多人線上同時遊玩"></textarea><br><br>
                 <label for="portfolio">作品集檔案：（非必填）</label><br>
                 <input type="file" id="portfolio" name="portfolio"><br><br>
-                <label for="docker_image">Docker Image 的 user/image:tag：（非必填）</label><br>
-                <input type="text" id="docker_image"i placeholder="tommygood/online-soccer-game:latest"><br><br>
-                <label for="domain">Domain：（非必填）</label><br>
-		<input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
-                <label for="internal_port">服務在容器內架設於哪個 port：（若有 Docker Image 則必填）</label><br>
-		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
-                <label for="memory_usage">容器記憶體使用量：（若有 Docker Image 則必填）</label><br>
-		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
-                <label for="internal_port">服務在容器內架設於哪個 port：（若有 Docker Image 則必填）</label><br>
-		<input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
+                <br/>
+                <input onchange="setContainerInfo()" type="checkbox" id="deploy_container"/>
+                <span>是否申請部屬容器</span>
+                <br/>
+                <label id="container_info" style="display:none;" for="container_info">
+                    <label for="docker_image">Docker Image 的 user/image:tag：（必填）</label><br>
+                    <input type="text" id="docker_image"i placeholder="tommygood/online-soccer-game:latest"><br><br>
+                    <label for="domain">Domain：（非必填）</label><br>
+                    <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
+                    <label for="internal_port">服務在容器內架設於哪個 port：（必填）</label><br>
+                    <input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
+                    <label for="memory_usage">容器記憶體使用量：（必填）</label><br>
+                    <input type="text" id="memory_usage" style="width:8%;text-align:center;" placeholder="80"><br><br>
+                    <label for="cpu_usage">容器 CPU 使用量：（必填）</label><br>
+                    <input type="text" id="cpu_usage" style="width:8%;text-align:center;" placeholder="80"><br><br>
+                </label>
     
             </form>
                 <button id = "sub" onclick = "submit()">提交申請</button>
