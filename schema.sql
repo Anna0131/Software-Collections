@@ -11,6 +11,7 @@ create table user (
     `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `role_id` int(10) NOT NULL ,
     `name` varchar(30) NOT NULL,
+    `password` varchar(30) DEFAULT NULL,
     `email` varchar(30) DEFAULT NULL,
     `s_num` int(20) DEFAULT NULL,
     `total_credit` int(10) DEFAULT 0,

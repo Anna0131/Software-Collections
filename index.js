@@ -36,7 +36,7 @@ app.use("/login", require("./pages/login.js"));
 app.use("/main", require("./pages/main.js"));
 app.use("/user", require("./pages/user.js"));
 app.use("/apply", require("./pages/apply.js"));
-app.use("/account", require("./pages/account.js"));
+app.use("/settings", require("./pages/settings.js"));
 app.use("/requirement", require("./pages/requirement.js"));
 app.use("/tutorial", require("./pages/tutorial.js"));
 app.use("/software", require("./pages/software.js"));
@@ -63,6 +63,7 @@ const pool = db.createPool({
 });
 
 
-server.listen(5000, function () {
-    console.log('Node server is running..');
+const port = 5000;
+server.listen(port, function () {
+    console.log('Node server is running at port', port);
 }); 

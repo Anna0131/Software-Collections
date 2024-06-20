@@ -87,6 +87,6 @@ async function postEmail() {
     window.location.reload();
 }
 
-setUserInfo();
 showSpecifyUserInfo();
+setUserInfo();
 setRefs();

@@ -45,24 +45,54 @@ async function insertUser(account, name) {
 	}
 }
 
+async function checkAddingUser(account, password) {
+    // if this account can not login on moodle, then check if this account is additionally added by root
+	let conn;
+	let user_id;
+	try {
+		conn = await util.getDBConnection(); // get connection from db
+		const user = await conn.query("select COUNT(*) from user where name = ? and password = ?;", [account, password]);
+		// account exists or not
+		if (user[0]["COUNT(*)"]) {
+		    return true;
+		}
+		else {
+		    return false;
+		}
+	}
+	catch(e) {
+		console.error(e);
+		await conn.rollback(); // rollback transaction
+		return false;
+	}
+	finally {
+		util.closeDBConnection(conn); // close db connection
+	}
+}
+
 router.post('/', async function(req, res) { // 注意這裡加了 async
     try {
         let suc = true;
         const account = req.body.account;
         const password = req.body.password;
 
-        const authen_result = await util.loginAuthentication(account, password);
-		console.log(authen_result);
+        let authen_result = await util.loginAuthentication(account, password);
         if (authen_result != "login failed") {
-			// login successfully
-			const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
-            //console.log("valid", user_id, authen_result);
+	    // login successfully
+	    const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
             data = {uid : user_id};
             const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
             res.cookie("token", token);
         }
         else {
-            suc = false;
+	    // if this account can not login on moodle, then check if this account is additionally added by root
+	    const is_adding_user = await checkAddingUser(account, password);
+	    if (is_adding_user) {
+	        authen_result = account;
+	    }
+	    else {
+	        suc = false;
+	    }
         }
 
         res.json({suc : suc, authen_result : authen_result});
