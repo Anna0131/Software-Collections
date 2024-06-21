@@ -51,10 +51,10 @@ async function checkAddingUser(account, password) {
 	let user_id;
 	try {
 		conn = await util.getDBConnection(); // get connection from db
-		const user = await conn.query("select COUNT(*) from user where name = ? and password = ?;", [account, password]);
+		const user = await conn.query("select user_id from user where name = ? and password = ?;", [account, password]);
 		// account exists or not
-		if (user[0]["COUNT(*)"]) {
-		    return true;
+		if (user[0] != undefined && user[0]["user_id"]) {
+		    return user[0]["user_id"];
 		}
 		else {
 		    return false;
@@ -86,9 +86,13 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
         }
         else {
 	    // if this account can not login on moodle, then check if this account is additionally added by root
-	    const is_adding_user = await checkAddingUser(account, password);
-	    if (is_adding_user) {
-	        authen_result = account;
+	    const user_id = await checkAddingUser(account, password);
+	    if (user_id) {
+	        // login successfully
+	        authen_result = user_id;
+                data = {uid : user_id};
+                const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
+                res.cookie("token", token);
 	    }
 	    else {
 	        suc = false;

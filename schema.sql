@@ -70,6 +70,13 @@ create table bulletin (
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+create table docker_spec (
+    `docker_spec_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `spec_type` varchar(10) NOT NULL ,
+    `spec_info` float(3) NOT NULL ,
+    PRIMARY KEY (`docker_spec_id`) USING BTREE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*
 create table tag_type (
     `tt_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -100,5 +107,7 @@ insert into ref(name, root_only) values("main", FALSE);
 insert into ref(name, root_only) values("user", FALSE);
 insert into ref(name, root_only) values("apply", FALSE);
 insert into ref(name, root_only) values("requirement", FALSE);
-insert into ref(name, root_only) values("account", TRUE);
-insert into ref(name, root_only) values("toturial", FALSE);
+insert into ref(name, root_only) values("settings", TRUE);
+insert into ref(name, root_only) values("tutorial", FALSE);
+
+insert into user(

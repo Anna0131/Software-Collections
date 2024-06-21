@@ -43,6 +43,16 @@
         	<button id = 'sub' onclick = "submit()">提交</button>
             </div>
 
+            <div class="section portfolio-list">
+		<h1>Docker Spec</h1>
+		<br/><span>RAM：</span><input id = "ram"></input>
+		<br/><span>CPU：</span><input id = "cpu"></input>
+		<br/><span>DISK：</span><input id = "disk"></input>
+		<br/><span>External Port Numbers：</span><input id = "port"></input>
+		<br/>
+		<button onclick="updateDockerSpec()">更新</button>
+	    </div>
+
         </div>
     </body>
     <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>

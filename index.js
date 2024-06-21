@@ -46,6 +46,7 @@ app.use("/api/software", require("./api/software.js"));
 app.use("/api/requirement", require("./api/requirement.js"));
 app.use("/api/refs", require("./api/refs.js"));
 app.use("/api/login", require("./api/login.js"));
+app.use("/api/settings", require("./api/settings.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));
@@ -67,3 +68,5 @@ const port = 5000;
 server.listen(port, function () {
     console.log('Node server is running at port', port);
 }); 
+
+module.exports = server;

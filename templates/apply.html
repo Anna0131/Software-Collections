@@ -31,12 +31,18 @@
                 <label id="container_info" style="display:none;" for="container_info">
                     <label for="docker_image">Docker Image 的 user/image:tag：（必填）</label><br>
                     <input type="text" id="docker_image"i placeholder="tommygood/online-soccer-game:latest"><br><br>
-                    <label for="internal_port">服務在容器內架設於哪個 port：（必填）</label><br>
+                    <label for="internal_port">
+			    外部 Port 要 Mapping 到容器內哪個 port：（非必填）
+			    <br/>
+			    最多可以填 <b><span id="mapping_port_nums"></span></b> 個，多個不同請以 <b>,</b> 隔開
+		    </label><br>
                     <input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
-                    <label for="memory_usage">容器記憶體使用量：（必填）</label><br>
-                    <input type="text" id="memory_usage" style="width:8%;text-align:center;" placeholder="80"><br><br>
+                    <label for="ram_usage">容器 RAM 使用量：（必填）</label><br>
+		    <select id="ram_usage"></select><br><br>
                     <label for="cpu_usage">容器 CPU 使用量：（必填）</label><br>
-                    <input type="text" id="cpu_usage" style="width:8%;text-align:center;" placeholder="80"><br><br>
+		    <select id="cpu_usage"></select><br><br>
+                    <label for="disk_usage">容器 Disk 使用量：（必填）</label><br>
+		    <select id="disk_usage"></select><br><br>
                     <label for="domain">Domain：（非必填）</label><br>
                     <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
                 </label>

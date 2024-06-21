@@ -39,5 +39,34 @@ function setContainerInfo() {
     }
 }
 
+async function setDockerSpec() {
+    // show current docker spec
+    const result = await axios.get("/api/settings/dockerSpec");
+    const data = result.data;
+    if (data.suc) {
+	// set docker spec
+	for (let i = 0;i < data.result.length;i++) {
+	    if (data.result[i].spec_type == "port") {
+		document.getElementById("mapping_port_nums").innerHTML = data.result[i].spec_info;
+	    }
+	    else {
+		// except the port spec, other type info of specs need to create a option and put it into relative select element
+
+		// create option element
+		const option = document.createElement("option");
+		option.value = data.result[i].spec_info;
+		option.innerHTML = data.result[i].spec_info;
+		// put option into relative select element
+		const select = document.getElementById(data.result[i].spec_type + "_usage");
+		select.appendChild(option);
+	    }
+	}
+    }
+    else {
+	alert("Error get the docker spec");
+    }
+}
+
 setUserInfo();
 setRefs();
+setDockerSpec();
