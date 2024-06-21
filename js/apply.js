@@ -2,13 +2,22 @@ async function postApplyInfo() {
     const topic = document.getElementById("topic").value;
     const tags = document.getElementById("tags").value;
     const description = document.getElementById("description").value;
-    // const portfolio = document.getElementById("portfolio").value;
-    const docker_image = document.getElementById("docker_image").value;
-    const domain = document.getElementById("domain").value;
-    const internal_port = document.getElementById("internal_port").value;
     const name = document.getElementById("user_info").innerHTML;
-    data = {topic, tags, description, docker_image, domain, name, internal_port};
-    let result = await axios.post('/apply/info', data);
+    // post docker spec info if the checkbox of applying the container is clicked
+    if (document.getElementById("container_info").style.display == "none") {
+	data = {topic, tags, description, name};
+    }
+    else {
+        const docker_image = document.getElementById("docker_image").value;
+        const internal_port = document.getElementById("internal_port").value;
+	const ram = document.getElementById("ram_usage").value;
+	const cpu = document.getElementById("cpu_usage").value;
+	const disk = document.getElementById("disk_usage").value;
+        const domain = document.getElementById("domain").value;
+	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain};
+    }
+    // post data
+    let result = await axios.post('/api/apply/info', data);
     result = result.data;
     console.log(result);
     if (result.suc == true) {

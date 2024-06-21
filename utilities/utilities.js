@@ -141,5 +141,9 @@ module.exports = {
     // get the root of url
     getUrlRoot : function(url) {
         return url.split(":")[0] + ":" + url.split(":")[1];
+    },
+
+    isEmptyStr : function(str) {
+	return (str=="" || str == null || str == undefined);
     }
 };

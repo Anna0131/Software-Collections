@@ -21,11 +21,12 @@ function ckUserPrivileges(user_id) {
 }
 
 // create container by pulling the image from docker hub
-function createContainer(docker_image, internal_port) {
+function createContainer(docker_image, internal_port, ram, cpu, disk) {
     const spawn = require("child_process").spawn;
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
-    const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port]);
+    ram += "g"; // unit of ram is gigabytes
+    const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port, ram, cpu, disk]);
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -49,6 +50,7 @@ function createContainer(docker_image, internal_port) {
             pythonProcess.stdout.on('data', (data) => {
 		if (index++ != 0) {
                     console.log(`returning data of creating container: ${data.toString()}`);
+		    console.log("test");
 		    const create_suc = data.toString().split("||")[0];
 		    const external_port = data.toString().split("||")[1].split('\n')[0];
                     if (create_suc === "true") {
@@ -267,6 +269,7 @@ router.post('/bulletin', async function(req, res) {
     }
 });
 
+// finish the application of creating container when admin press the agree button in email
 router.get('/agreement', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
@@ -283,7 +286,7 @@ router.get('/agreement', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 	    	await conn.query("update software set success_upload = 1 where software_id = ?;", software_id);
-		software_info = await conn.query("select docker_image, internal_port from software where software_id = ?", software_id);
+		software_info = await conn.query("select docker_image, internal_port, memory, cpu, storage from software where software_id = ?", software_id);
 	    }
 	    catch(e) {
 		console.error(e);
@@ -294,7 +297,7 @@ router.get('/agreement', async function(req, res) {
 	    }
 	    // pull app image from docker hub, and create the container on the docker server
 	    try {
-		const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port);
+		const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage);
 		if (container_create[0] == false) {
 		    // failed to create container, return the error msg
 		    res.json({msg : "failed to create container : " + container_create[1]}); 
@@ -410,6 +413,140 @@ router.delete('/', async function(req, res) {
     catch(e) {
         console.log(e);
         res.json({msg : "login failed"});
+    }
+});
+
+// get the detailed info of specify container
+
+// get the logs of the container
+async function getContainerLog(container_name) {
+    // call python script
+    const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
+    const info_type = "logs";
+    const spawn = require("child_process").spawn;
+    const pythonProcess = spawn('python', [pythonScript, container_name, info_type]);
+
+            return new Promise((resolve, reject) => { // 包裝成 Promise
+
+            	pythonProcess.stderr.on('data', (data) => {
+                    console.error(`stderr: ${data.toString()}`);
+                    resolve([false, data.toString()]); // failed to create container, return the error msg
+            	});
+
+            	pythonProcess.on('exit', (code) => {
+                    console.log(`child process exited with code ${code}`);
+                    if (code !== 0) {
+                        reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
+                    }
+            	});
+
+            	pythonProcess.on('error', (err) => {
+                    console.error(err);
+                    reject(err); // 子進程啟動失敗
+            	});
+
+            	pythonProcess.stdout.on('data', (data) => {
+                    console.log(`returning data of creating container: ${data.toString()}`);
+		    data = data.toString().replaceAll("'", '"'); 
+		    data = JSON.parse(data);
+                    if (data.suc === "true") {
+                       resolve([true, data.result]); // create container successfully, return the external port which the service is deployed on it
+                    } 
+		    else {
+                        resolve([false, data.error]); // failed to create container, return the error msg
+                    }
+                });
+	    });
+}
+
+
+router.get('/info/logs', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const container_name = req.query.external_port;
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const result = await getContainerLog(container_name);
+	    if (result[0]) {
+		res.json({suc : true, result : result[1]});
+	    }
+	    else {
+		res.json({suc : false, msg : result[1]});
+	    }
+	}
+	else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "error occured"});
+    }
+});
+
+// get the logs of the container
+async function getContainerResourceUsage(container_name) {
+    // call python script
+    const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
+    const info_type = "resource_usage";
+    const spawn = require("child_process").spawn;
+    const pythonProcess = spawn('python', [pythonScript, container_name, info_type]);
+
+            return new Promise((resolve, reject) => { // 包裝成 Promise
+
+            	pythonProcess.stderr.on('data', (data) => {
+                    console.error(`stderr: ${data.toString()}`);
+                    resolve([false, data.toString()]); // failed to create container, return the error msg
+            	});
+
+            	pythonProcess.on('exit', (code) => {
+                    console.log(`child process exited with code ${code}`);
+                    if (code !== 0) {
+                        reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
+                    }
+            	});
+
+            	pythonProcess.on('error', (err) => {
+                    console.error(err);
+                    reject(err); // 子進程啟動失敗
+            	});
+
+            	pythonProcess.stdout.on('data', (data) => {
+                    console.log(`returning data of creating container: ${data.toString()}`);
+		    data = (data.toString()).replaceAll("'", '"'); 
+		    data = JSON.parse(data);
+                    if (data.suc === "true") {
+                       resolve([true, data.result]); // create container successfully, return the external port which the service is deployed on it
+                    } 
+		    else {
+                        resolve([false, data.error]); // failed to create container, return the error msg
+                    }
+                });
+	    });
+}
+
+
+router.get('/info/resourceUsage', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const container_name = req.query.external_port;
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const result = await getContainerResourceUsage(container_name);
+	    if (result[0]) {
+		res.json({suc : true, result : result[1]});
+	    }
+	    else {
+		res.json({suc : false, msg : result[1]});
+	    }
+	}
+	else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "error occured"});
     }
 });
 

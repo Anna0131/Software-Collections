@@ -47,6 +47,7 @@ app.use("/api/requirement", require("./api/requirement.js"));
 app.use("/api/refs", require("./api/refs.js"));
 app.use("/api/login", require("./api/login.js"));
 app.use("/api/settings", require("./api/settings.js"));
+app.use("/api/apply", require("./api/apply.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));

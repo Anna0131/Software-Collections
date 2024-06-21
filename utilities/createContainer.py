@@ -1,4 +1,6 @@
-# this script is used for running the specify docker container
+"""
+this script is used for running the specify docker container
+"""
 from subprocess import call, PIPE, run, Popen
 import ast, argparse, time, socket, sys
 
@@ -11,6 +13,9 @@ import ast, argparse, time, socket, sys
 #args = vars(ap.parse_args())
 image = sys.argv[1] # docker image
 internal_port = sys.argv[2] # the port which is open in the origin service of internal container
+ram = sys.argv[3] # ram usage
+cpu = sys.argv[4] # cpu usage
+disk = sys.argv[5] # disk usage
 
 #image = args["image"]
 #if args["port"] :
@@ -41,11 +46,11 @@ def selectPort() :
             return i
     return 0
 
-def main(internal_port, image) :
+def main(internal_port, image, ram, cpu, disk) :
     # select free external port
     external_port = selectPort()
     # run docker container
-    cmd = "sudo docker run --name %s -p %s:%s -d %s" % (external_port, external_port, internal_port, image)
+    cmd = "sudo docker run --name %s -p %s:%s --memory=%s --cpus=%s -d %s" % (external_port, external_port, internal_port, ram, cpu, image)
     #print(cmd)
     result = Popen(cmd, shell=True)
     streamdata = result.communicate()[0]
@@ -60,4 +65,4 @@ def main(internal_port, image) :
         return "false||" + str(result)
 
 if __name__ == "__main__":
-    print(main(internal_port, image))
+    print(main(internal_port, image, ram, cpu, disk))

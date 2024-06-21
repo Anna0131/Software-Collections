@@ -26,6 +26,28 @@ function getUrlRootWithPort() {
     return document.URL.split("/")[0] + "//" + document.URL.split("/")[2];
 }
 
+async function getContainerLogs(external_port) {
+    const result = await axios.get(`/api/software/info/logs?external_port=${external_port}`);
+    return result.data;
+    console.log(result);
+}
+
+async function getContainerResourceUsage(external_port) {
+    const result = await axios.get(`/api/software/info/resourceUsage?external_port=${external_port}`);
+    return result.data;
+    console.log(result);
+}
+
+async function setContainerLogs(external_port) {
+    const container_logs = await getContainerLogs(external_port);
+    document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
+}
+
+async function setContainerResourceUsage(external_port) {
+    const container_resource_usage = await getContainerResourceUsage(external_port);
+    document.getElementById("container_resource_usage").innerHTML = container_resource_usage.result;
+}
+
 async function showSoftwareCollections() {
     // show the all of softwares that are passed the verification by supervisors on the table
     const data = await getSoftwareInfo();
@@ -45,6 +67,10 @@ async function showSoftwareCollections() {
 	"<td>" + lessTime(software_info.create_time) + "</td>" +
 	"<td>" + software_info.view_nums + "</td>" +
 	"</tr>";
+	
+	// set the container info
+	setContainerLogs(software_info.external_port);
+	setContainerResourceUsage(software_info.external_port);
     }
     else {
 	// failed to get the data of softwares
