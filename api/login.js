@@ -70,36 +70,101 @@ async function checkAddingUser(account, password) {
 	}
 }
 
+async function insertLoginRecord(suc, account, ip) {
+    // record the login record no matter successful or not
+	// convert ipv6 to ipv4
+	ip = ip.split(":");
+	ip = ip[ip.length-1];
+    
+	let conn;
+	let user_id;
+	const time = new Date();
+	try {
+		conn = await util.getDBConnection(); // get connection from db
+		await conn.query("insert into login_record(ip, account, time, suc) values(?, ?, ?, ?);", [ip, account, time, suc]);
+	}
+	catch(e) {
+		console.error(e);
+	}
+	finally {
+		util.closeDBConnection(conn); // close db connection
+	}
+}
+
+async function blockBruteForce(ip) {
+    // convert ipv6 to ipv4
+    ip = ip.split(":");
+    ip = ip[ip.length-1];
+
+    // block rule
+    const block_rule = {failed_nums : 3, period : 10}; // ban the ip from login, if it failed over {failed_nums} times in {period} min
+
+    // check if this ip should be banned
+	let conn;
+	let user_id;
+	let is_blocked = true;
+	const MS_PER_MINUTE = 60000;
+	const time = new Date();
+	const period_start = new Date(time - block_rule.period * MS_PER_MINUTE);;
+	try {
+		conn = await util.getDBConnection(); // get connection from db
+		// get the number of failure in the period of this ip
+		const result = await conn.query("select COUNT(*) from login_record where ip = ? and time >= ? and suc = 0;", [ip, period_start]);
+		if (result[0]["COUNT(*)"] < block_rule.failed_nums) {
+		    is_blocked = false;
+		}
+	}
+	catch(e) {
+		console.error(e);
+	}
+	finally {
+		util.closeDBConnection(conn); // close db connection
+	}
+	return is_blocked
+}
+
+// process login request
 router.post('/', async function(req, res) { // 注意這裡加了 async
     try {
         let suc = true;
         const account = req.body.account;
         const password = req.body.password;
 
-        let authen_result = await util.loginAuthentication(account, password);
-        if (authen_result != "login failed") {
-	    // login successfully
-	    const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
-            data = {uid : user_id};
-            const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
-            res.cookie("token", token);
-        }
-        else {
-	    // if this account can not login on moodle, then check if this account is additionally added by root
-	    const user_id = await checkAddingUser(account, password);
-	    if (user_id) {
+	// check if this ip exceed the limitation of login failure in a period of time
+	const is_blocked = await blockBruteForce(req.ip);
+	if (is_blocked) {
+	    suc = false;
+	    res.json({suc : suc, authen_result : "You are blocked as the violation of exceeding the failure login numbers"});
+	}
+	else {
+
+            let authen_result = await util.loginAuthentication(account, password);
+            if (authen_result != "login failed") {
 	        // login successfully
-	        authen_result = user_id;
+	        const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
                 data = {uid : user_id};
                 const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
                 res.cookie("token", token);
-	    }
-	    else {
-	        suc = false;
-	    }
-        }
+            }
+            else {
+	        // if this account can not login on moodle, then check if this account is additionally added by root
+	        const user_id = await checkAddingUser(account, password);
+	        if (user_id) {
+	            // login successfully
+	            authen_result = user_id;
+                    data = {uid : user_id};
+                    const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
+                    res.cookie("token", token);
+	        }
+	        else {
+	            suc = false;
+	        }
+            }
+            res.json({suc : suc, authen_result : authen_result});
 
-        res.json({suc : suc, authen_result : authen_result});
+	    insertLoginRecord(suc, account, req.ip);
+	}
+
     }
     catch (e) {
         console.log(e);

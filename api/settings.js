@@ -2,6 +2,7 @@
 const router = require("express").Router();
 const util = require("./../utilities/utilities.js");
 
+// add a new user manually
 router.post('/', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
@@ -13,16 +14,25 @@ router.post('/', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-	    	let role_id = await conn.query("select role_id from role where name = ?;", account_type);
-		role_id = role_id[0].role_id;
-		// Start Transaction
-		await conn.beginTransaction();
-		const result = await conn.batch('insert into user(role_id, name, password, total_credit) values(?,?,?,?);', [role_id, account, password, total_credit], async function(err, result, fields) {
-		    if (err) throw err;
-		});
-		const user_id = result.insertId;
-		await conn.commit(); // commit changes
-		res.json({suc : true});
+		// ensure the account name does not conflicted with the data in db
+	    	const same_name = await conn.query("select COUNT(*) from user where name = ?;", account);
+		if (same_name[0]["COUNT(*)"] > 0) {
+		    res.json({suc : false, msg : "conflicted account"});
+		}
+		else {
+	    	    let role_id = await conn.query("select role_id from role where name = ?;", account_type);
+		    role_id = role_id[0].role_id;
+		    // Start Transaction
+		    await conn.beginTransaction();
+	    	    const user_num = await conn.query("select COUNT(*) from user;");
+		    const s_num = Number(user_num[0]["COUNT(*)"]) + 1;
+		    const result = await conn.batch('insert into user(role_id, name, password, total_credit, s_num) values(?,?,?,?,?);', [role_id, account, password, total_credit, s_num], async function(err, result, fields) {
+		        if (err) throw err;
+		    });
+		    const user_id = result.insertId;
+		    await conn.commit(); // commit changes
+		    res.json({suc : true});
+		}
 	    }
 	    catch(e) {
 		console.error(e);

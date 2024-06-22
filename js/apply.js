@@ -14,7 +14,9 @@ async function postApplyInfo() {
 	const cpu = document.getElementById("cpu_usage").value;
 	const disk = document.getElementById("disk_usage").value;
         const domain = document.getElementById("domain").value;
-	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain};
+        const env = document.getElementById("env").value;
+        const volumes = document.getElementById("volumes").value;
+	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes};
     }
     // post data
     let result = await axios.post('/api/apply/info', data);

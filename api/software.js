@@ -49,8 +49,6 @@ function createContainer(docker_image, internal_port, ram, cpu, disk) {
 
             pythonProcess.stdout.on('data', (data) => {
 		if (index++ != 0) {
-                    console.log(`returning data of creating container: ${data.toString()}`);
-		    console.log("test");
 		    const create_suc = data.toString().split("||")[0];
 		    const external_port = data.toString().split("||")[1].split('\n')[0];
                     if (create_suc === "true") {
@@ -285,7 +283,6 @@ router.get('/agreement', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-	    	await conn.query("update software set success_upload = 1 where software_id = ?;", software_id);
 		software_info = await conn.query("select docker_image, internal_port, memory, cpu, storage from software where software_id = ?", software_id);
 	    }
 	    catch(e) {
@@ -310,6 +307,7 @@ router.get('/agreement', async function(req, res) {
 		    let user_info;
 	    	    try {
 	    		conn = await util.getDBConnection(); // get connection from db
+	    		await conn.query("update software set success_upload = 1 where software_id = ?;", software_id);
 	    		await conn.query("update software set external_port = ? where software_id = ?;", [external_port, software_id]);
 			// get the info of user to send back the email
 			user_info = await conn.query("select * from user where user_id = ?", user_id);
@@ -418,12 +416,13 @@ router.delete('/', async function(req, res) {
 
 // get the detailed info of specify container
 
-// get the logs of the container
+// get the logs of the container with py script
 async function getContainerLog(container_name) {
     // call python script
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "logs";
     const spawn = require("child_process").spawn;
+	console.log(pythonScript, container_name, info_type);
     const pythonProcess = spawn('python', [pythonScript, container_name, info_type]);
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
@@ -446,7 +445,6 @@ async function getContainerLog(container_name) {
             	});
 
             	pythonProcess.stdout.on('data', (data) => {
-                    console.log(`returning data of creating container: ${data.toString()}`);
 		    data = data.toString().replaceAll("'", '"'); 
 		    data = JSON.parse(data);
                     if (data.suc === "true") {
@@ -484,7 +482,7 @@ router.get('/info/logs', async function(req, res) {
     }
 });
 
-// get the logs of the container
+// get the resource usage of the container with py script
 async function getContainerResourceUsage(container_name) {
     // call python script
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
@@ -512,7 +510,6 @@ async function getContainerResourceUsage(container_name) {
             	});
 
             	pythonProcess.stdout.on('data', (data) => {
-                    console.log(`returning data of creating container: ${data.toString()}`);
 		    data = (data.toString()).replaceAll("'", '"'); 
 		    data = JSON.parse(data);
                     if (data.suc === "true") {
@@ -525,6 +522,33 @@ async function getContainerResourceUsage(container_name) {
 	    });
 }
 
+// extract the usage of ram, cpu, disk from text of docker stats
+function seperateResources(origin_resources) {
+    origin_resources = origin_resources.split(" ");
+    let resources = {};
+    let not_empty_index = 0;
+    for (let i = 0;i < origin_resources.length;i++) {
+	if (origin_resources[i] != "") {
+	    not_empty_index++;
+	    if (not_empty_index == 3) {
+		resources["cpu_usage_percent"] = origin_resources[i];
+	    }
+	    else if (not_empty_index == 4) {
+		resources["ram_usage"] = origin_resources[i];
+	    }
+	    else if (not_empty_index == 6) {
+		resources["ram_limit"] = origin_resources[i];
+	    }
+	    else if (not_empty_index == 7) {
+		resources["ram_usage_percent"] = origin_resources[i];
+	    }
+	    else if (not_empty_index == 11) {
+		resources["disk_usage"] = origin_resources[i];
+	    }
+	}
+    }
+    return resources;
+}
 
 router.get('/info/resourceUsage', async function(req, res) {
     try {
@@ -534,7 +558,11 @@ router.get('/info/resourceUsage', async function(req, res) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const result = await getContainerResourceUsage(container_name);
 	    if (result[0]) {
-		res.json({suc : true, result : result[1]});
+		// return the usage of ram, cpu, disk
+		const resources = seperateResources(result[1]);
+		// make resource usage output with above info
+		const resource_usage_info = `CPU %     MEM USAGE /   LIMIT     MEM %     BLOCK<br/>${resources.cpu_usage_percent}      ${resources.ram_usage}          /   ${resources.ram_limit}      ${resources.ram_usage_percent}        ${resources.disk_usage}`.replaceAll(" ", "&nbsp;");
+		res.json({suc : true, result : resources});
 	    }
 	    else {
 		res.json({suc : false, msg : result[1]});

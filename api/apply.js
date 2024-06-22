@@ -73,6 +73,8 @@ router.post('/info', async function(req, res) {
 	    const ram = req.body.ram;
 	    const cpu = req.body.cpu;
 	    const disk = req.body.disk;
+	    const env = req.body.env;
+	    const volumes = req.body.volumes;
 
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const datetime = new Date();
@@ -90,7 +92,7 @@ router.post('/info', async function(req, res) {
 		// Start Transaction
 		await conn.beginTransaction();
 		// software
-	    	const software_result = await conn.batch("insert into software(owner_user_id, topic, description, docker_image, domain, create_time, internal_port, memory, cpu, storage) values(?,?,?,?,?,?,?,?,?,?);", [user_id, topic, description, docker_image, domain, datetime, internal_port, ram, cpu, disk]);
+	    	const software_result = await conn.batch("insert into software(owner_user_id, topic, description, docker_image, domain, create_time, internal_port, memory, cpu, storage, env, volumes) values(?,?,?,?,?,?,?,?,?,?,?,?);", [user_id, topic, description, docker_image, domain, datetime, internal_port, ram, cpu, disk, env, volumes]);
 		software_id = software_result.insertId;
 		// tags
 		for (let i = 0;i < tags.length;i++) {

@@ -16,7 +16,7 @@ def main(container_name, info_type) :
 def getContainerResourceUsage(container_name) :
     cmd = "sudo docker stats | grep %s" % (container_name)
     with Popen(["docker" ,"stats"], stdout=PIPE, stderr=None) as process:
-        time.sleep(3.0)
+        time.sleep(4.0)
         process.kill()
         output = process.communicate()[0].decode("utf-8")
         all_container_stats = output.split("\n")

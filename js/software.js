@@ -45,7 +45,16 @@ async function setContainerLogs(external_port) {
 
 async function setContainerResourceUsage(external_port) {
     const container_resource_usage = await getContainerResourceUsage(external_port);
-    document.getElementById("container_resource_usage").innerHTML = container_resource_usage.result;
+    document.getElementById("container_resource_usage").innerHTML += 
+    `
+    <tr>
+    <td>${container_resource_usage.result.cpu_usage_percent}</td>
+    <td>${container_resource_usage.result.ram_usage}</td>
+    <td>${container_resource_usage.result.ram_limit}</td>
+    <td>${container_resource_usage.result.ram_usage_percent}</td>
+    <td>${container_resource_usage.result.disk_usage}</td>
+    </tr>
+    `;
 }
 
 async function showSoftwareCollections() {
@@ -94,7 +103,6 @@ async function getBulletin() {
 async function showBulletin() {
     // show the all of softwares that are passed the verification by supervisors on the table
     const data = await getBulletin();
-    console.log(data);
     const suc = data.suc;
     const bulletin = data.bulletin;
     if (suc) {

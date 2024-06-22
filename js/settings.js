@@ -1,4 +1,5 @@
 async function submit() {
+    // post the new account info
     const type = document.getElementById("type").value;
     const total_credit = document.getElementById("total_credit").value;
     const account = document.getElementById("account").value;
@@ -9,6 +10,10 @@ async function submit() {
     if (suc_account.suc) {
 	alert("新增成功");
     }
+    else {
+	alert(`新增失敗：${suc_account.msg}`);
+    }
+    window.location.reload();
 }
 
 async function updateDockerSpec() {
@@ -26,6 +31,7 @@ async function updateDockerSpec() {
     else {
 	alert("更新失敗！");
     }
+    window.location.reload();
 }
 
 async function showCurDockerSpec() {

@@ -45,6 +45,13 @@
 		    <select id="disk_usage"></select><br><br>
                     <label for="domain">Domain：（非必填）</label><br>
                     <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
+		    <label for="env"><a href="https://docs.docker.com/compose/environment-variables/set-environment-variables/#set-environment-variables-with-docker-compose-run---env">環境變數</a>：（非必填）</label><br>
+		    <div>多個請以換行隔開</div>
+		    <textarea placeholder="account=test&#10;password=123" id="env" rows="4" cols="50"></textarea><br/><br/>
+		    <label for="volumes"><a href="https://docs.docker.com/storage/volumes/">Volumes</a>：（非必填）</label><br>
+		    <div>多個請以換行隔開</div>
+		    <div>the path where the file or directory are mounted in the container.</div>
+		    <textarea placeholder="/var/lib/mysql&#10;/var/lib/mysql/data" id="volumes" rows="4" cols="50"></textarea>
                 </label>
     
             </form>
