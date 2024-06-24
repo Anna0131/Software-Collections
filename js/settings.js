@@ -56,6 +56,20 @@ async function showCurDockerSpec() {
     }
 }
 
+async function updateMaxApplicationNums() {
+    // update maximum numbers of limitation of application in a day
+    const max_nums = document.getElementById("max_application_nums").value;
+    const data = {max_nums};
+    const result = await axios.post("/api/settings/max_application_nums", data);
+    if (result.data.suc) {
+	alert("更新成功！");
+    }
+    else {
+	alert("更新失敗！");
+    }
+    window.location.reload();
+}
+
 setUserInfo();
 setRefs();
 showCurDockerSpec();

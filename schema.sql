@@ -102,10 +102,18 @@ create table login_record (
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 create index ip_index on login_record(ip);
 
+create table general_settings (
+    `settings_name` varchar(30) NOT NULL ,
+    `value` float(5) NOT NULL ,
+    PRIMARY KEY (`settings_name`) USING BTREE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/* All the roles of user */
 insert into role(name) values("admin");
 insert into role(name) values("teacher");
 insert into role(name) values("student");
 
+/* All the links that can be used by the user */
 insert into ref(name, root_only) values("main", FALSE);
 insert into ref(name, root_only) values("user", FALSE);
 insert into ref(name, root_only) values("apply", FALSE);
@@ -113,4 +121,8 @@ insert into ref(name, root_only) values("requirement", FALSE);
 insert into ref(name, root_only) values("settings", TRUE);
 insert into ref(name, root_only) values("tutorial", FALSE);
 
+/* Default user */
 insert into user(role_id, name, password, total_credit) values(1, "test", "123", 100);
+
+/* Default gerneral settings */
+insert into general_settings values("max_application_nums", 3);

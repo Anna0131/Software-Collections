@@ -127,6 +127,7 @@ router.post('/dockerSpec', async function(req, res) {
 	        }
 	        catch(e) {
 		    console.error(e);
+		    await conn.rollback(); // rollback transaction
 		    res.json({suc : false});
 	        }
 	        finally {
@@ -137,6 +138,36 @@ router.post('/dockerSpec', async function(req, res) {
                 res.json({msg : "login failed"});
             }
 	}
+    }
+    catch(e) {
+        console.log(e);
+	res.json({suc : false});
+    }
+});
+
+// update maximum numbers of limitation of application in a single day
+router.post('/max_application_nums', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const max_application_nums = req.body.max_nums; //
+	    let conn;
+	    try {
+	    	conn = await util.getDBConnection(); // get connection from db
+	    	await conn.query("update general_settings set value = ? where settings_name = 'max_application_nums';", [max_application_nums]);
+		res.json({suc : true});
+	    }
+	    catch(e) {
+		console.error(e);
+		res.json({suc : false});
+	    }
+	    finally {
+		util.closeDBConnection(conn); // close db connection
+	    }
+        }
+        else {
+            res.json({msg : "login failed"});
+        }
     }
     catch(e) {
         console.log(e);

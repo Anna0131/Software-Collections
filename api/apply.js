@@ -81,10 +81,46 @@ function mkContent(name, topic, tags, description, docker_image, domain, create_
     return content;
 }
 
+async function overApplicationLimit(user_id) {
+    let conn;
+    let application_nums;
+    let max_application_nums;
+    try {
+    	conn = await util.getDBConnection(); // get connection from db
+	const date = new Date().toLocaleDateString();
+	const result = await conn.query("select COUNT(*) from software where owner_user_id = ? and create_time >= ?;", [user_id, date]); // return the nums of application of this user in today
+    	application_nums = result[0]["COUNT(*)"];
+	max_application_nums = await conn.query("select value from general_settings where settings_name = 'max_application_nums';");
+	max_application_nums = max_application_nums[0].value;
+
+    }
+    catch(e) {
+	console.error(e);
+    }
+    finally {
+	util.closeDBConnection(conn); // close db connection
+    }
+
+    if (application_nums >= max_application_nums) {
+	return true;
+    }
+    else {
+	return false;
+    }
+}
+
 router.post('/info', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+
+	    // check if over the limit of one user can apply in a single day
+	    const check_over_application_limit = await overApplicationLimit(user_id);
+	    if (check_over_application_limit) {
+		return res.json({"suc" : false, "msg" : "your application numbers in today are exceeding the maximum of one user can apply in a single day"});
+	    }
+
 	    // request data
 	    const topic = req.body.topic;
 	    const tags = req.body.tags.split("、");
@@ -100,7 +136,6 @@ router.post('/info', async function(req, res) {
 	    const env = req.body.env;
 	    const volumes = req.body.volumes;
 
-	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const datetime = new Date();
 	
 	    // check the data comply the format
