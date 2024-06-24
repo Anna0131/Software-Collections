@@ -50,7 +50,20 @@ def selectPort() :
 
 def main(internal_port, image, ram, cpu, disk, env, volumes) :
     # check the image existed in local
+    try:
+        from subprocess import DEVNULL # py3k
+    except ImportError:
+        import os
+        DEVNULL = open(os.devnull, 'wb')
     cmd_image_existed = "sudo docker inspect --type=image %s" % (image)
+    result = Popen(cmd_image_existed, shell=True, stdout=DEVNULL)
+    streamdata = result.communicate()[0]
+    rc_image_existed = result.returncode # get return code of execution
+    if rc_image_existed != 0 :
+        cmd_pull_image = "sudo docker image pull %s" %(image)
+        result = Popen(cmd_pull_image, shell=True, stdout=DEVNULL)
+        rc_pull_image = result.returncode # get return code of execution
+        #print("rc pi", rc_pull_image)
 
     # select free external port
     external_port = selectPort()

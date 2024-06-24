@@ -16,9 +16,9 @@ async function getSoftwareInfo() {
     }
 }
 
-function getUrlRoot() {
-    // get the root of url
-    return document.URL.split(":")[0] + ":" + document.URL.split(":")[1];
+function getHost() {
+    // get the host from url
+    return document.URL.split(":")[1].split("//")[1];
 }
 
 function getUrlRootWithPort() {
@@ -27,32 +27,44 @@ function getUrlRootWithPort() {
 }
 
 async function getContainerLogs(external_port) {
+    //get the logs of this container
     const result = await axios.get(`/api/software/info/logs?external_port=${external_port}`);
     return result.data;
 }
 
 async function getContainerResourceUsage(external_port) {
+    //get the info of the resource usage by this container
     const result = await axios.get(`/api/software/info/resourceUsage?external_port=${external_port}`);
     return result.data;
 }
 
 async function setContainerLogs(external_port) {
     const container_logs = await getContainerLogs(external_port);
-    document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
+    if (container_logs.suc) {
+    	document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
+    }
+    else {
+	console.log(container_logs.msg);
+    }
 }
 
 async function setContainerResourceUsage(external_port) {
     const container_resource_usage = await getContainerResourceUsage(external_port);
-    document.getElementById("container_resource_usage").innerHTML += 
-    `
-    <tr>
-    <td>${container_resource_usage.result.cpu_usage_percent}</td>
-    <td>${container_resource_usage.result.ram_usage}</td>
-    <td>${container_resource_usage.result.ram_limit}</td>
-    <td>${container_resource_usage.result.ram_usage_percent}</td>
-    <td>${container_resource_usage.result.disk_usage}</td>
-    </tr>
-    `;
+    if (container_resource_usage.suc) {
+        document.getElementById("container_resource_usage").innerHTML += 
+    	`
+    	<tr>
+    	<td>${container_resource_usage.result.cpu_usage_percent}</td>
+    	<td>${container_resource_usage.result.ram_usage}</td>
+    	<td>${container_resource_usage.result.ram_limit}</td>
+    	<td>${container_resource_usage.result.ram_usage_percent}</td>
+    	<td>${container_resource_usage.result.disk_usage}</td>
+    	</tr>
+        `;
+    }
+    else {
+	console.log(container_resource_usage.msg);
+    }
 }
 
 async function showSoftwareCollections() {
@@ -62,14 +74,15 @@ async function showSoftwareCollections() {
     const software_info = data.software_info;
     if (suc) {
     	const tab = document.getElementById("software_info");
-	let url = getUrlRoot() + ":" + software_info.external_port; // make the url of project with external port and root of current url
+	let url = getHost() + ":" + software_info.external_port; // make the url of project with external port and root of current url
 	let user_info = getUrlRootWithPort() + `/user?user_id=${software_info.user_id}`;
 	tab.innerHTML += 
 	"<tr/><td/>"+ software_info.software_id +  
 	"<td>" + software_info.topic + "</td>" +
 	"<td>" + software_info.description + "</td>" +
 	`<td><a target="_blank" href = "${user_info}">` + software_info.name + "</a></td>" +
-	`<td><a target="_blank" href = "${url}">` + url + "</a></td>" +
+	"<td>" + getHost() + "</td>" +
+	"<td>" + software_info.external_port + "</td>" +
 	"<td>" + software_info.domain + ".im.ncnu.edu.tw" + "</td>" +
 	"<td>" + lessTime(software_info.create_time) + "</td>" +
 	"<td>" + software_info.view_nums + "</td>" +

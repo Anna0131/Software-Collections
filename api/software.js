@@ -26,14 +26,14 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
     ram += "g"; // unit of ram is gigabytes
-    console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
+    // console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
     const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes]);
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
             pythonProcess.stderr.on('data', (data) => {
                 console.error(`stderr: ${data.toString()}`);
-                resolve([false, data.toString()]); // failed to create container, return the error msg
+                //resolve([false, data.toString()]); // failed to create container, return the error msg
             });
 
             pythonProcess.on('exit', (code) => {
@@ -45,19 +45,24 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
 
             pythonProcess.on('error', (err) => {
                 console.error(err);
-                reject(err); // 子進程啟動失敗
+                // reject(err); // 子進程啟動失敗
             });
 
             pythonProcess.stdout.on('data', (data) => {
 		if (index++ != 0) {
-		    const create_suc = data.toString().split("||")[0];
-		    const external_port = data.toString().split("||")[1].split('\n')[0];
-                    if (create_suc === "true") {
-                        resolve([true, external_port]); // create container successfully, return the external port which the service is deployed on it
-                    } 
-		    else {
-                        resolve([false, external_port]); // failed to create container, return the error msg
-                    }
+		    try {
+		        const create_suc = data.toString().split("||")[0];
+		        const external_port = data.toString().split("||")[1].split('\n')[0];
+                        if (create_suc === "true") {
+                            resolve([true, external_port]); // create container successfully, return the external port which the service is deployed on it
+                        } 
+		        else {
+                            resolve([false, external_port]); // failed to create container, return the error msg
+                        }
+		    }
+		    catch(e) {
+			console.error(e);
+		    }
 		}
             });
 	});
@@ -429,7 +434,7 @@ async function getContainerLog(container_name) {
 
             	pythonProcess.stderr.on('data', (data) => {
                     console.error(`stderr: ${data.toString()}`);
-                    resolve([false, data.toString()]); // failed to create container, return the error msg
+                    //resolve([false, data.toString()]); // failed to create container, return the error msg
             	});
 
             	pythonProcess.on('exit', (code) => {
@@ -441,7 +446,7 @@ async function getContainerLog(container_name) {
 
             	pythonProcess.on('error', (err) => {
                     console.error(err);
-                    reject(err); // 子進程啟動失敗
+                    //reject(err); // 子進程啟動失敗
             	});
 
             	pythonProcess.stdout.on('data', (data) => {
@@ -465,7 +470,7 @@ router.get('/info/logs', async function(req, res) {
 	    const container_name = req.query.external_port;
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const result = await getContainerLog(container_name);
-	    if (result[0]) {
+	    if (result[0] && result[1] != "false") {
 		res.json({suc : true, result : result[1]});
 	    }
 	    else {
@@ -555,17 +560,22 @@ router.get('/info/resourceUsage', async function(req, res) {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
 	    const container_name = req.query.external_port;
-	    const user_id = await util.getTokenUid(req.cookies.token);
-	    const result = await getContainerResourceUsage(container_name);
-	    if (result[0]) {
-		// return the usage of ram, cpu, disk
-		const resources = seperateResources(result[1]);
-		// make resource usage output with above info
-		const resource_usage_info = `CPU %     MEM USAGE /   LIMIT     MEM %     BLOCK<br/>${resources.cpu_usage_percent}      ${resources.ram_usage}          /   ${resources.ram_limit}      ${resources.ram_usage_percent}        ${resources.disk_usage}`.replaceAll(" ", "&nbsp;");
-		res.json({suc : true, result : resources});
+	    if (container_name=="null") {
+		return res.json({suc : false, msg : "container can not be null"});
 	    }
 	    else {
-		res.json({suc : false, msg : result[1]});
+	        const user_id = await util.getTokenUid(req.cookies.token);
+	        const result = await getContainerResourceUsage(container_name);
+	        if (result[0]) {
+		    // return the usage of ram, cpu, disk
+		    const resources = seperateResources(result[1]);
+		    // make resource usage output with above info
+		    const resource_usage_info = `CPU %     MEM USAGE /   LIMIT     MEM %     BLOCK<br/>${resources.cpu_usage_percent}      ${resources.ram_usage}          /   ${resources.ram_limit}      ${resources.ram_usage_percent}        ${resources.disk_usage}`.replaceAll(" ", "&nbsp;");
+		    res.json({suc : true, result : resources});
+	        }
+	        else {
+		    res.json({suc : false, msg : result[1]});
+	        }
 	    }
 	}
 	else {
