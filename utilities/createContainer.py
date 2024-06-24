@@ -16,6 +16,8 @@ internal_port = sys.argv[2] # the port which is open in the origin service of in
 ram = sys.argv[3] # ram usage
 cpu = sys.argv[4] # cpu usage
 disk = sys.argv[5] # disk usage
+env = sys.argv[6] # env variables
+volumes = sys.argv[7] # volumes
 
 #image = args["image"]
 #if args["port"] :
@@ -46,12 +48,29 @@ def selectPort() :
             return i
     return 0
 
-def main(internal_port, image, ram, cpu, disk) :
+def main(internal_port, image, ram, cpu, disk, env, volumes) :
+    # check the image existed in local
+    cmd_image_existed = "sudo docker inspect --type=image %s" % (image)
+
     # select free external port
     external_port = selectPort()
-    # run docker container
-    cmd = "sudo docker run --name %s -p %s:%s --memory=%s --cpus=%s -d %s" % (external_port, external_port, internal_port, ram, cpu, image)
+    # make docker run command
+    cmd = "sudo docker run --name %s -p %s:%s --memory=%s --cpus=%s" % (external_port, external_port, internal_port, ram, cpu)
+    # add env variables if not empty
+    if env.strip() :
+        env = env.split("\n")
+        for e in env :
+            cmd += " -e " + e
+    # add volumes if not empty
+    if volumes.strip() :
+        volumes = volumes.split("\n")
+        for v in volumes :
+            cmd += " -v :" + v
+    # add image
+    cmd += " -d " + image
     #print(cmd)
+
+    # run docker container
     result = Popen(cmd, shell=True)
     streamdata = result.communicate()[0]
     rc = result.returncode # get return code of execution
@@ -65,4 +84,4 @@ def main(internal_port, image, ram, cpu, disk) :
         return "false||" + str(result)
 
 if __name__ == "__main__":
-    print(main(internal_port, image, ram, cpu, disk))
+    print(main(internal_port, image, ram, cpu, disk, env, volumes))

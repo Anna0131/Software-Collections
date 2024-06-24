@@ -29,13 +29,11 @@ function getUrlRootWithPort() {
 async function getContainerLogs(external_port) {
     const result = await axios.get(`/api/software/info/logs?external_port=${external_port}`);
     return result.data;
-    console.log(result);
 }
 
 async function getContainerResourceUsage(external_port) {
     const result = await axios.get(`/api/software/info/resourceUsage?external_port=${external_port}`);
     return result.data;
-    console.log(result);
 }
 
 async function setContainerLogs(external_port) {

@@ -3,18 +3,38 @@ const bodyParser = require("body-parser");
 const util = require("./../utilities/utilities.js");
 const sendEmail = require("./../utilities/sendEmail.js");
 
-function ckFormat(topic, tags, description, docker_image, domain, cpu, ram, disk) {
+function ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk, env, volumes) {
     if (ram != undefined || cpu != undefined || disk != undefined) {
 	// check docker spec
 	if (util.isEmptyStr(docker_image) || util.isEmptyStr(ram) || util.isEmptyStr(cpu) || util.isEmptyStr(disk)) {
-	    // check whether necessary column is empty
-	    return false;
+	    // check whether required column is empty
+	    return {result : false, msg : "required column is empty"};
 	}
+	// check the format of env and volumes if not empty
+	// env
+	if (!util.isEmptyStr(env)) {
+	    env = env.split("\n");
+	    for (let i = 0;i < env.length;i++) {
+	        // check the num of = in each line
+	        if (env[i].split("=").length != 2) {
+	            return {result : false, msg : "wrong env format"};
+	        }
+	    }
+	}
+	// volumes
+	if (!util.isEmptyStr(volumes)) {
+	    volumes = volumes.split("\n");
+	    for (let i = 0;i < volumes.length;i++) {
+	        if (volumes[i][0] != "/") {
+	            return {result : false, msg : "wrong volumes format"};
+	        }
+	    }
+        }
     }
-    return true;
+    return {result : true};
 }
 
-function mkContent(name, topic, tags, description, docker_image, domain, create_time, software_id, internal_port, ram, cpu, disk) {
+function mkContent(name, topic, tags, description, docker_image, domain, create_time, software_id, internal_port, ram, cpu, disk, env, volumes) {
     const new_line = "<br/>";
     let content = "<!DOCTYPE html>";
     // username
@@ -46,6 +66,10 @@ function mkContent(name, topic, tags, description, docker_image, domain, create_
 	content += "CPU：" + cpu + " 顆" + new_line;
 	// disk
 	content += "Disk：" + disk + " GB" + new_line;
+	// env
+	content += "ENV Variables：" + new_line + env.replaceAll("\n", new_line) + new_line;
+	// volumes
+	content += "Volumes：" + new_line + volumes.replaceAll("\n", new_line) + new_line;
 	content += new_line;
     }
     // apply time
@@ -78,10 +102,11 @@ router.post('/info', async function(req, res) {
 
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const datetime = new Date();
-
+	
 	    // check the data comply the format
-	    if (!ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk)) {
-		return res.json({msg : "wrong format"});
+	    const check_format_result = ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk, env, volumes);
+	    if (check_format_result.result == false) {
+		return res.json({msg : "wrong format : " + check_format_result.msg});
 	    }
 
 	    // insert data into db
@@ -112,7 +137,7 @@ router.post('/info', async function(req, res) {
 	    // send email
 	    try {
         	receivers = ["s109213059@mail1.ncnu.edu.tw", "tommy50508@gmail.com"];
-        	content = mkContent(name, topic, tags, description, docker_image, domain, datetime, software_id, internal_port, ram, cpu, disk);
+        	content = mkContent(name, topic, tags, description, docker_image, domain, datetime, software_id, internal_port, ram, cpu, disk, env, volumes);
         	sendEmail.send(receivers, topic, content);
 	    }
 	    catch(e) {

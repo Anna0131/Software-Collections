@@ -21,12 +21,13 @@ function ckUserPrivileges(user_id) {
 }
 
 // create container by pulling the image from docker hub
-function createContainer(docker_image, internal_port, ram, cpu, disk) {
+function createContainer(docker_image, internal_port, ram, cpu, disk, env, volumes) {
     const spawn = require("child_process").spawn;
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
     ram += "g"; // unit of ram is gigabytes
-    const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port, ram, cpu, disk]);
+    console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
+    const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes]);
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -174,7 +175,7 @@ router.get('/specify', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 		// get the info of software
-		software_info = await conn.query("select s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.user_id from software as s, user as u where s.success_upload = 1 and u.user_id = s.owner_user_id and s.software_id = ?;", [software_id]); // return the necessary data which will be display on the page of main
+		software_info = await conn.query("select s.success_upload, s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.user_id from software as s, user as u where u.user_id = s.owner_user_id and s.software_id = ?;", [software_id]); // return the necessary data which will be display on the page of main
 		software_info = software_info[0];
 		// add the view nums
 		const cookie_name = `software_${software_id}_last_view_time`;
@@ -283,7 +284,7 @@ router.get('/agreement', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-		software_info = await conn.query("select docker_image, internal_port, memory, cpu, storage from software where software_id = ?", software_id);
+		software_info = await conn.query("select docker_image, internal_port, memory, cpu, storage, env, volumes from software where software_id = ?", software_id);
 	    }
 	    catch(e) {
 		console.error(e);
@@ -294,7 +295,7 @@ router.get('/agreement', async function(req, res) {
 	    }
 	    // pull app image from docker hub, and create the container on the docker server
 	    try {
-		const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage);
+		const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes);
 		if (container_create[0] == false) {
 		    // failed to create container, return the error msg
 		    res.json({msg : "failed to create container : " + container_create[1]}); 
@@ -422,7 +423,6 @@ async function getContainerLog(container_name) {
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "logs";
     const spawn = require("child_process").spawn;
-	console.log(pythonScript, container_name, info_type);
     const pythonProcess = spawn('python', [pythonScript, container_name, info_type]);
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
