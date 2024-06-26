@@ -10,7 +10,9 @@
 	    </ul>
         </div>
         <div class="container">
-        <p>您好，<span id="user_info">(學號_使用者)</span>！</p>
+        <p>您好，<span id="user_info">(學號_使用者)</span>！
+	    <button style="display:inline;" onclick="logout()">登出</button>
+	</p>
         <div class="section application-form">
             <h2>填寫申請表</h2>
             <form action="後端URL" method="post" enctype="multipart/form-data">
@@ -37,12 +39,18 @@
 			    最多可以填 <b><span id="mapping_port_nums"></span></b> 個，多個不同請以 <b>,</b> 隔開
 		    </label><br>
                     <input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
+		    <label for="set_public">開放 Public 存取：（必填）</label>
+		    <select id="set_public">
+			<option value="1">開放</option>
+			<option value="0">不開放</option>
+		    </select>
+		    <br/><br/>
                     <label for="ram_usage">容器 RAM 使用量：（必填）</label><br>
-		    <select id="ram_usage"></select><br><br>
+		    <select id="ram_usage"></select><span> GB</span><br><br>
                     <label for="cpu_usage">容器 CPU 使用量：（必填）</label><br>
-		    <select id="cpu_usage"></select><br><br>
+		    <select id="cpu_usage"></select><span> 顆</span><br><br>
                     <label for="disk_usage">容器 Disk 使用量：（必填）</label><br>
-		    <select id="disk_usage"></select><br><br>
+		    <select id="disk_usage"></select><span> GB</span><br><br>
                     <label for="domain">Domain：（非必填）</label><br>
                     <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
 		    <label for="env"><a href="https://docs.docker.com/compose/environment-variables/set-environment-variables/#set-environment-variables-with-docker-compose-run---env">環境變數</a>：（非必填）</label><br>

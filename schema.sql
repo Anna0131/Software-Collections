@@ -53,6 +53,7 @@ create table software (
     `cpu` float(3) NULL,
     `env` varchar(300) NULL ,
     `volumes` varchar(300) NULL ,
+    `set_public` boolean NULL,
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

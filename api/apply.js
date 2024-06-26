@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const util = require("./../utilities/utilities.js");
 const sendEmail = require("./../utilities/sendEmail.js");
 
-function ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk, env, volumes) {
+function ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk, env, volumes, set_public) {
     if (ram != undefined || cpu != undefined || disk != undefined) {
 	// check docker spec
 	if (util.isEmptyStr(docker_image) || util.isEmptyStr(ram) || util.isEmptyStr(cpu) || util.isEmptyStr(disk)) {
@@ -135,11 +135,12 @@ router.post('/info', async function(req, res) {
 	    const disk = req.body.disk;
 	    const env = req.body.env;
 	    const volumes = req.body.volumes;
+	    const set_public = req.body.set_public;
 
 	    const datetime = new Date();
 	
 	    // check the data comply the format
-	    const check_format_result = ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk, env, volumes);
+	    const check_format_result = ckFormat(topic, tags, description, docker_image, domain, internal_port, ram, cpu, disk, env, volumes, set_public);
 	    if (check_format_result.result == false) {
 		return res.json({msg : "wrong format : " + check_format_result.msg});
 	    }
@@ -152,7 +153,7 @@ router.post('/info', async function(req, res) {
 		// Start Transaction
 		await conn.beginTransaction();
 		// software
-	    	const software_result = await conn.batch("insert into software(owner_user_id, topic, description, docker_image, domain, create_time, internal_port, memory, cpu, storage, env, volumes) values(?,?,?,?,?,?,?,?,?,?,?,?);", [user_id, topic, description, docker_image, domain, datetime, internal_port, ram, cpu, disk, env, volumes]);
+	    	const software_result = await conn.batch("insert into software(owner_user_id, topic, description, docker_image, domain, create_time, internal_port, memory, cpu, storage, env, volumes, set_public) values(?,?,?,?,?,?,?,?,?,?,?,?,?);", [user_id, topic, description, docker_image, domain, datetime, internal_port, ram, cpu, disk, env, volumes, set_public]);
 		software_id = software_result.insertId;
 		// tags
 		for (let i = 0;i < tags.length;i++) {

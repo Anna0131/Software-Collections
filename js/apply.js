@@ -1,3 +1,29 @@
+// post file
+/*
+async function postHeadshot() {
+    // post headshot
+    const formData = new FormData();
+    const imagefile = document.querySelector('#headshot_upload');
+    formData.append("image", imagefile.files[0]);
+    const result = await axios.post('/api/user/headshot', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    
+    console.log(result.data);
+    if (result.data.suc == true) {
+	// successfully update headshot
+	alert("更新照片成功");
+    }
+    else {
+	alert("更新照片失敗", result.data.msg);
+    }
+    // reload the page to refresh the new data
+    window.location.reload();
+}
+*/
+
 async function postApplyInfo() {
     const topic = document.getElementById("topic").value;
     const tags = document.getElementById("tags").value;
@@ -16,7 +42,8 @@ async function postApplyInfo() {
         const domain = document.getElementById("domain").value;
         const env = document.getElementById("env").value;
         const volumes = document.getElementById("volumes").value;
-	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes};
+        const set_public = document.getElementById("set_public").value;
+	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, set_public};
     }
     // post data
     let result = await axios.post('/api/apply/info', data);

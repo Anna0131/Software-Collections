@@ -63,7 +63,9 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
         cmd_pull_image = "sudo docker image pull %s" %(image)
         result = Popen(cmd_pull_image, shell=True, stdout=DEVNULL)
         rc_pull_image = result.returncode # get return code of execution
-        #print("rc pi", rc_pull_image)
+        if rc_pull_image != 0 :
+            return "false||failed to pull the image : " + image
+        ##print("rc pi", rc_pull_image)
 
     # select free external port
     external_port = selectPort()

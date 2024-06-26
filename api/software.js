@@ -33,7 +33,10 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
 
             pythonProcess.stderr.on('data', (data) => {
                 console.error(`stderr: ${data.toString()}`);
-                //resolve([false, data.toString()]); // failed to create container, return the error msg
+		// no such image error is fined, as the python script will pull it later
+		if (!data.includes("No such image")) {
+                    resolve([false, data.toString()]); // failed to create container, return the error msg
+		}
             });
 
             pythonProcess.on('exit', (code) => {
@@ -41,11 +44,13 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
                 if (code !== 0) {
                     reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
                 }
+
             });
 
             pythonProcess.on('error', (err) => {
                 console.error(err);
                 // reject(err); // 子進程啟動失敗
+                //resolve([false, "failed to create container : " + error]); // failed to create container, return the error msg
             });
 
             pythonProcess.stdout.on('data', (data) => {
