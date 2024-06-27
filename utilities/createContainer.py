@@ -3,6 +3,7 @@ this script is used for running the specify docker container
 """
 from subprocess import call, PIPE, run, Popen
 import ast, argparse, time, socket, sys
+from uuid import uuid4
 
 #internal_port = 80
 #image = None
@@ -70,7 +71,8 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
     # select free external port
     external_port = selectPort()
     # make docker run command
-    cmd = "sudo docker run --name %s -p %s:%s --memory=%s --cpus=%s" % (external_port, external_port, internal_port, ram, cpu)
+    container_name = str(uuid4())
+    cmd = "sudo docker run --name %s -p %s:%s --memory=%s --cpus=%s" % (container_name, external_port, internal_port, ram, cpu)
     # add env variables if not empty
     if env.strip() :
         env = env.split("\n")
@@ -93,7 +95,7 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
     #print("return code :", rc)
     if rc == 0 :
         # return code = 0, meaning execute successfully
-        return "true||" + str(external_port) # use || to split message
+        return "true||" + str(external_port) + "||" + container_name # use || to split message
     else :
         # otherwise, meaning execute failed
         return "false||" + str(result)

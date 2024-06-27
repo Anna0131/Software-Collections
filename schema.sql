@@ -54,6 +54,7 @@ create table software (
     `env` varchar(300) NULL ,
     `volumes` varchar(300) NULL ,
     `set_public` boolean NULL,
+    `container_name` varchar(100) NULL ,
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -90,6 +91,7 @@ create table tag (
 create table ref (
     `ref_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` varchar(100) NOT NULL ,
+    `val` varchar(100) NOT NULL ,
     `root_only` boolean NOT NULL,
     PRIMARY KEY (`ref_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -115,12 +117,12 @@ insert into role(name) values("teacher");
 insert into role(name) values("student");
 
 /* All the links that can be used by the user */
-insert into ref(name, root_only) values("main", FALSE);
-insert into ref(name, root_only) values("user", FALSE);
-insert into ref(name, root_only) values("apply", FALSE);
-insert into ref(name, root_only) values("requirement", FALSE);
-insert into ref(name, root_only) values("settings", TRUE);
-insert into ref(name, root_only) values("tutorial", FALSE);
+insert into ref(name, val, root_only) values("主頁面", "main", FALSE);
+insert into ref(name, val, root_only) values("使用者資訊", "user", FALSE);
+insert into ref(name, val, root_only) values("申請部屬軟體", "apply", FALSE);
+insert into ref(name, val, root_only) values("軟體開發需求", "requirement", FALSE);
+insert into ref(name, val, root_only) values("系統設定", "settings", TRUE);
+insert into ref(name, val, root_only) values("系統教學", "tutorials", FALSE);
 
 /* Default user */
 insert into user(role_id, name, password, total_credit) values(1, "test", "123", 100);

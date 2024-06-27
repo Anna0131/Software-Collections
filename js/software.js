@@ -26,21 +26,22 @@ function getUrlRootWithPort() {
     return document.URL.split("/")[0] + "//" + document.URL.split("/")[2];
 }
 
-async function getContainerLogs(external_port) {
+async function getContainerLogs(software_id) {
     //get the logs of this container
-    const result = await axios.get(`/api/software/info/logs?external_port=${external_port}`);
+    const result = await axios.get(`/api/software/info/logs?software_id=${software_id}`);
     return result.data;
 }
 
-async function getContainerResourceUsage(external_port) {
+async function getContainerResourceUsage(software_id) {
     //get the info of the resource usage by this container
-    const result = await axios.get(`/api/software/info/resourceUsage?external_port=${external_port}`);
+    const result = await axios.get(`/api/software/info/resourceUsage?software_id=${software_id}`);
     return result.data;
 }
 
-async function setContainerLogs(external_port) {
-    const container_logs = await getContainerLogs(external_port);
+async function setContainerLogs(external_port, software_id) {
+    const container_logs = await getContainerLogs(software_id);
     if (container_logs.suc) {
+	document.getElementById("container_info").style.display = "block";
     	document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
     }
     else {
@@ -48,9 +49,10 @@ async function setContainerLogs(external_port) {
     }
 }
 
-async function setContainerResourceUsage(external_port) {
-    const container_resource_usage = await getContainerResourceUsage(external_port);
+async function setContainerResourceUsage(external_port, software_id) {
+    const container_resource_usage = await getContainerResourceUsage(software_id);
     if (container_resource_usage.suc) {
+	document.getElementById("container_info").style.display = "block";
         document.getElementById("container_resource_usage").innerHTML += 
     	`
     	<tr>
@@ -89,8 +91,8 @@ async function showSoftwareCollections() {
 	"</tr>";
 	
 	// set the container info
-	setContainerLogs(software_info.external_port);
-	setContainerResourceUsage(software_info.external_port);
+	setContainerLogs(software_info.external_port, software_info.software_id);
+	setContainerResourceUsage(software_info.external_port, software_info.software_id);
     }
     else {
 	// failed to get the data of softwares

@@ -58,8 +58,9 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
 		    try {
 		        const create_suc = data.toString().split("||")[0];
 		        const external_port = data.toString().split("||")[1].split('\n')[0];
+		        const container_name = data.toString().split("||")[2].split('\n')[0];
                         if (create_suc === "true") {
-                            resolve([true, external_port]); // create container successfully, return the external port which the service is deployed on it
+                            resolve([true, external_port, container_name]); // create container successfully, return the external port which the service is deployed on it
                         } 
 		        else {
                             resolve([false, external_port]); // failed to create container, return the error msg
@@ -315,11 +316,11 @@ router.get('/agreement', async function(req, res) {
 		    // return the external port which the service is deployed on it, and update to the data in db
 
 		    const external_port = container_create[1];
+		    const container_name = container_create[2];
 		    let user_info;
 	    	    try {
 	    		conn = await util.getDBConnection(); // get connection from db
-	    		await conn.query("update software set success_upload = 1 where software_id = ?;", software_id);
-	    		await conn.query("update software set external_port = ? where software_id = ?;", [external_port, software_id]);
+	    		await conn.query("update software set external_port = ?, container_name = ?, success_upload = 1  where software_id = ?;", [external_port, container_name, software_id]);
 			// get the info of user to send back the email
 			user_info = await conn.query("select * from user where user_id = ?", user_id);
 	    	    }
@@ -390,6 +391,22 @@ function deleteContainer(container_name) {
             });
 }
 
+async function getContainerName(software_id) {
+    let conn;
+    try {
+    	conn = await util.getDBConnection(); // get connection from db
+	const container_name = await conn.query("select container_name from software where software_id = ?", [software_id]);
+	return container_name[0]["container_name"];
+    }
+    catch(e) {
+	console.error(e);
+	return false;
+    }
+    finally {
+	util.closeDBConnection(conn); // close db connection
+    }
+}
+
 // delete the software
 router.delete('/', async function(req, res) {
     try {
@@ -397,11 +414,12 @@ router.delete('/', async function(req, res) {
 	if (result) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const software_id = req.body.software_id;
-	    const external_port = req.body.external_port;
 	    // delete record from db
 	    let conn;
+	    let container_name;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
+	    	container_name = await getContainerName(software_id);
 		await conn.query("delete from software where software_id = ? and owner_user_id = ?", [software_id, user_id]);
 	    	res.json({suc : true});
 	    }
@@ -413,7 +431,7 @@ router.delete('/', async function(req, res) {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	    // delete container from docker server
-	    deleteContainer(external_port)
+	    deleteContainer(container_name);
 	}
 	else {
             res.json({msg : "login failed"});
@@ -468,18 +486,44 @@ async function getContainerLog(container_name) {
 }
 
 
+async function containerOwner(container_name) {
+    let conn;
+    let owner_id = null;
+    try {
+    	conn = await util.getDBConnection(); // get connection from db
+	owner_id = await conn.query("select owner_user_id from software where container_name = ?", [container_name]);
+	owner_id = owner_id[0]["owner_user_id"];
+    }
+    catch(e) {
+	console.error(e);
+    }
+    finally {
+	util.closeDBConnection(conn); // close db connection
+    }
+    return owner_id;
+}
+
+
 router.get('/info/logs', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
-	    const container_name = req.query.external_port;
+	    const software_id = req.query.software_id;
+	    // only show the docker log message on owner page
 	    const user_id = await util.getTokenUid(req.cookies.token);
-	    const result = await getContainerLog(container_name);
-	    if (result[0] && result[1] != "false") {
-		res.json({suc : true, result : result[1]});
+	    const container_name = await getContainerName(software_id);
+	    const owner_user_id = await containerOwner(container_name);
+	    if (owner_user_id == user_id) {
+	        const result = await getContainerLog(container_name);
+	        if (result[0] && result[1] != "false") {
+		    res.json({suc : true, result : result[1]});
+	        }
+	        else {
+		    res.json({suc : false, msg : result[1]});
+	        }
 	    }
 	    else {
-		res.json({suc : false, msg : result[1]});
+		res.json({suc : false, msg : "invalid credentials"});
 	    }
 	}
 	else {
@@ -564,12 +608,17 @@ router.get('/info/resourceUsage', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
-	    const container_name = req.query.external_port;
+	    const software_id = req.query.software_id;
+	    const container_name = await getContainerName(software_id);
 	    if (container_name=="null") {
 		return res.json({suc : false, msg : "container can not be null"});
 	    }
 	    else {
 	        const user_id = await util.getTokenUid(req.cookies.token);
+	    	const owner_user_id = await containerOwner(container_name);
+	    	if (owner_user_id != user_id) {
+		    return res.json({suc : false, msg : "invalid credentials"});
+		}
 	        const result = await getContainerResourceUsage(container_name);
 	        if (result[0]) {
 		    // return the usage of ram, cpu, disk

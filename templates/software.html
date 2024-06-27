@@ -35,20 +35,23 @@
 		    <td>建立時間</td>
 		    <td>瀏覽次數</td>
 	    </table>
-	    <h3>Docker Container Logs</h3>
-	    <details>
-	        <summary>展開/收合 Log</summary>
-	    	<div id = "container_logs"></div>
-	    </details>
-	    <h3>Docker Container Resource Usage</h3>
-	    <table id = "container_resource_usage">
-		<tr>
-		    <td>CPU %</td>
-		    <td>MEM USAGE</td>
-		    <td>MEM LIMIT</td>
-		    <td>MEM %</td>
-		    <td>BLOCK</td>
-	    </table>
+	    <div style="display:none;" id="container_info"> 
+	        <h2>Container Info（僅擁有者看的到）</h2>
+	        <h3>Docker Container Logs</h3>
+	        <details>
+	            <summary>展開/收合 Log</summary>
+	    	    <div id = "container_logs"></div>
+	        </details>
+	        <h3>Docker Container Resource Usage</h3>
+	        <table id = "container_resource_usage">
+		    <tr>
+		        <td>CPU %</td>
+		        <td>MEM USAGE</td>
+		        <td>MEM LIMIT</td>
+		        <td>MEM %</td>
+		        <td>BLOCK</td>
+	         </table>
+	    </div>
 	</div>
 
         <div class="section portfolio-list">

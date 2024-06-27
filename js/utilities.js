@@ -71,7 +71,7 @@ async function setRefs() {
     for (let i = 0;i < all_refs.length;i++) {
         let li_element = document.createElement("li");
 	let a_element = document.createElement("a");
-	a_element.href = all_refs[i].name;
+	a_element.href = all_refs[i].val;
 	a_element.innerHTML = all_refs[i].name;
 	li_element.appendChild(a_element);
 	ref_list.appendChild(li_element);
