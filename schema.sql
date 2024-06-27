@@ -125,7 +125,7 @@ insert into ref(name, val, root_only) values("系統設定", "settings", TRUE);
 insert into ref(name, val, root_only) values("系統教學", "tutorials", FALSE);
 
 /* Default user */
-insert into user(role_id, name, password, total_credit) values(1, "test", "123", 100);
+insert into user(role_id, name, password, total_credit, s_num) values(1, "test", "123", 100, 1);
 
 /* Default gerneral settings */
 insert into general_settings values("max_application_nums", 3);

@@ -642,4 +642,41 @@ router.get('/info/resourceUsage', async function(req, res) {
     }
 });
 
+async function updateSoftwareDesciption(software_id, content, user_id) {
+    let conn;
+    try {
+    	conn = await util.getDBConnection(); // get connection from db
+	await conn.query("update software set description = ? where software_id = ? and owner_user_id = ?;", [content, software_id, user_id]);
+    }
+    catch(e) {
+	console.error(e);
+	return {suc : "false", msg : "sql error"};
+    }
+    finally {
+	util.closeDBConnection(conn); // close db connection
+	return {suc : "true"};
+    }
+}
+
+// update description of software
+router.put("/description", async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const software_id = req.body.software_id;
+	    const content = req.body.content;
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const result = await updateSoftwareDesciption(software_id, content, user_id);
+	    res.json(result);
+	}
+	else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "error occured"});
+    }
+});
+
 module.exports = router;

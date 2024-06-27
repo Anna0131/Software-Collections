@@ -27,7 +27,6 @@
 		<tr>
 		    <td>作品編號</td>
 		    <td>主題</td>
-		    <td>介紹</td>
 		    <td>建立者</td>
 		    <td>IP</td>
 		    <td>Port</td>
@@ -35,6 +34,14 @@
 		    <td>建立時間</td>
 		    <td>瀏覽次數</td>
 	    </table>
+	    <br/>
+	    <table border = "1" id = "tab_description">
+		<tr>
+		    <td>介紹</td>
+		</tr>
+	    </table>
+	    <button id = 'bt_update_description' style="float:right;display:none;" onclick='updateDescription()'>更新</button>
+
 	    <div style="display:none;" id="container_info"> 
 	        <h2>Container Info（僅擁有者看的到）</h2>
 	        <h3>Docker Container Logs</h3>

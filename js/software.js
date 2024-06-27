@@ -69,6 +69,19 @@ async function setContainerResourceUsage(external_port, software_id) {
     }
 }
 
+function setEditSoftware() {
+    // make owner can edit the software
+    document.getElementById("bt_update_description").style.display = "inline"; 
+    document.getElementById("description").readOnly = false;
+}
+
+async function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
+
 async function showSoftwareCollections() {
     // show the all of softwares that are passed the verification by supervisors on the table
     const data = await getSoftwareInfo();
@@ -81,18 +94,25 @@ async function showSoftwareCollections() {
 	tab.innerHTML += 
 	"<tr/><td/>"+ software_info.software_id +  
 	"<td>" + software_info.topic + "</td>" +
-	"<td>" + software_info.description + "</td>" +
-	`<td><a target="_blank" href = "${user_info}">` + software_info.name + "</a></td>" +
+	`<td><a target="_blank" href = "${user_info}">` + software_info.name + "</a></td>" +  
 	"<td>" + getHost() + "</td>" +
 	"<td>" + software_info.external_port + "</td>" +
 	"<td>" + software_info.domain + ".im.ncnu.edu.tw" + "</td>" +
 	"<td>" + lessTime(software_info.create_time) + "</td>" +
 	"<td>" + software_info.view_nums + "</td>" +
 	"</tr>";
+	const tab_description = document.getElementById("tab_description");
+        tab_description.innerHTML += 
+	"<tr><textarea id='description' rows='10' cols='80' readonly>" + software_info.description + "</textarea></td></tr>";
 	
-	// set the container info
-	setContainerLogs(software_info.external_port, software_info.software_id);
-	setContainerResourceUsage(software_info.external_port, software_info.software_id);
+	// set the container info if the user is owner
+	await sleep(100); // prevent from getting default user info as too early to fetch innerHTML
+	const s_num = document.getElementById("user_info").innerHTML.split(" ")[0];
+	if (s_num == software_info.user_id) {
+	    setEditSoftware();
+	    setContainerLogs(software_info.external_port, software_info.software_id);
+	    setContainerResourceUsage(software_info.external_port, software_info.software_id);
+	}
     }
     else {
 	// failed to get the data of softwares
@@ -149,6 +169,19 @@ async function postComment() {
     else {
 	alert("新增留言失敗，" + result.msg);
     }
+}
+
+async function updateDescription() {
+    const content = document.getElementById("description").value;
+    const data = {software_id, content};
+    const result = await axios.put("/api/software/description", data);
+    if (result.data.suc) {
+        alert("更新成功！");
+    }
+    else {
+	alert("更新失敗！");
+    }
+    window.location.reload();
 }
 
 setUserInfo();
