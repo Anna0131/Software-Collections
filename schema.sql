@@ -54,6 +54,7 @@ create table software (
     `env` varchar(300) NULL ,
     `volumes` varchar(300) NULL ,
     `set_public` boolean NULL,
+    `ssl` boolean NULL,
     `container_name` varchar(100) NULL ,
     PRIMARY KEY (`software_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -123,6 +124,7 @@ insert into ref(name, val, root_only) values("申請部屬軟體", "apply", FALS
 insert into ref(name, val, root_only) values("軟體開發需求", "requirement", FALSE);
 insert into ref(name, val, root_only) values("系統設定", "settings", TRUE);
 insert into ref(name, val, root_only) values("系統教學", "tutorials", FALSE);
+insert into ref(name, val, root_only) values("審核軟體申請", "audit", FALSE);
 
 /* Default user */
 insert into user(role_id, name, password, total_credit, s_num) values(1, "test", "123", 100, 1);

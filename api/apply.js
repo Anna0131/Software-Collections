@@ -109,6 +109,16 @@ async function overApplicationLimit(user_id) {
     }
 }
 
+function onlyOneOrZero(val) {
+    // return only one or zero to prevent invalid input store in db
+    if (val) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+}
+
 router.post('/info', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
@@ -135,7 +145,8 @@ router.post('/info', async function(req, res) {
 	    const disk = req.body.disk;
 	    const env = req.body.env;
 	    const volumes = req.body.volumes;
-	    const set_public = req.body.set_public;
+	    const set_public = onlyOneOrZero(req.body.set_public);
+	    const ssl = onlyOneOrZero(req.body.ssl);
 
 	    const datetime = new Date();
 	
@@ -153,7 +164,7 @@ router.post('/info', async function(req, res) {
 		// Start Transaction
 		await conn.beginTransaction();
 		// software
-	    	const software_result = await conn.batch("insert into software(owner_user_id, topic, description, docker_image, domain, create_time, internal_port, memory, cpu, storage, env, volumes, set_public) values(?,?,?,?,?,?,?,?,?,?,?,?,?);", [user_id, topic, description, docker_image, domain, datetime, internal_port, ram, cpu, disk, env, volumes, set_public]);
+	    	const software_result = await conn.batch("insert into software(owner_user_id, topic, description, docker_image, domain, create_time, internal_port, memory, cpu, storage, env, volumes, set_public, `ssl`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?);", [user_id, topic, description, docker_image, domain, datetime, internal_port, ram, cpu, disk, env, volumes, set_public, ssl]);
 		software_id = software_result.insertId;
 		// tags
 		for (let i = 0;i < tags.length;i++) {
@@ -164,7 +175,7 @@ router.post('/info', async function(req, res) {
 	    catch(e) {
 		console.error(e);
 		await conn.rollback(); // rollback transaction
-		res.json({suc : false});
+		return res.json({suc : false});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection

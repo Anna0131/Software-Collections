@@ -45,19 +45,20 @@
 			<option value="0">不開放</option>
 		    </select>
 		    <br/><br/>
+                    <label for="domain">Domain：（非必填）</label><br>
+		    <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
+                    <label for="ssl">Http Reverse Proxy + SSL：（非必填）</label>
+		    <select id="ssl">
+			<option value="0">不申請</option>
+			<option value="1">申請</option>
+		    </select>
+		    <br/><br/>
                     <label for="ram_usage">容器 RAM 使用量：（必填）</label><br>
 		    <select id="ram_usage"></select><span> GB</span><br><br>
                     <label for="cpu_usage">容器 CPU 使用量：（必填）</label><br>
 		    <select id="cpu_usage"></select><span> 顆</span><br><br>
                     <label for="disk_usage">容器 Disk 使用量：（必填）</label><br>
 		    <select id="disk_usage"></select><span> GB</span><br><br>
-                    <label for="domain">Domain：（非必填）</label><br>
-                    <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
-                    <label for="ssl">SSL：（非必填）</label><br>
-		    <select id="ssl">
-			<option value="0">不申請</option>
-			<option value="1">申請</option>
-		    </select>
 		    <label for="env"><a href="https://docs.docker.com/compose/environment-variables/set-environment-variables/#set-environment-variables-with-docker-compose-run---env">環境變數</a>：（非必填）</label><br>
 		    <div>多個請以換行隔開</div>
 		    <textarea placeholder="account=test&#10;password=123" id="env" rows="4" cols="50"></textarea><br/><br/>

@@ -43,12 +43,12 @@ async function postApplyInfo() {
         const env = document.getElementById("env").value;
         const volumes = document.getElementById("volumes").value;
         const set_public = document.getElementById("set_public").value;
-	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, set_public};
+        const ssl = document.getElementById("ssl").value;
+	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, set_public, ssl};
     }
     // post data
     let result = await axios.post('/api/apply/info', data);
     result = result.data;
-    console.log(result);
     if (result.suc == true) {
 	alert("申請已成功送出，若成功會再寄信告知");
 	window.location.href = "/main";

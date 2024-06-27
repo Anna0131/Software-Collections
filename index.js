@@ -40,6 +40,7 @@ app.use("/settings", require("./pages/settings.js"));
 app.use("/requirement", require("./pages/requirement.js"));
 app.use("/tutorial", require("./pages/tutorial.js"));
 app.use("/software", require("./pages/software.js"));
+app.use("/audit", require("./pages/audit.js"));
 // api
 app.use("/api/user", require("./api/user.js"));
 app.use("/api/software", require("./api/software.js"));
