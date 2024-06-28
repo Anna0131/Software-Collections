@@ -145,5 +145,26 @@ module.exports = {
 
     isEmptyStr : function(str) {
 	return (str=="" || str == null || str == undefined);
+    },
+
+    is_numeric : function(str){
+        return /^\d+$/.test(str);
+    },
+
+    getUserRole : async function(user_id) {
+	// return the role id of user
+	let conn;
+	try {
+	    conn = await this.getDBConnection(); // get connection from db
+	    const role_id = await conn.query("select role_id from user where user_id = ?;", [user_id]); // return the necessary data which will be display on the page of main
+	    return role_id[0]["role_id"];
+ 	}
+	catch(e) {
+	    console.error(e);
+	    return false;
+	}
+	finally {
+	    this.closeDBConnection(conn); // close db connection
+	}
     }
 };

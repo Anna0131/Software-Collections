@@ -72,7 +72,7 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
     external_port = selectPort()
     # make docker run command
     container_name = str(uuid4())
-    cmd = "sudo docker run --name %s -p %s:%s --memory=%s --cpus=%s" % (container_name, external_port, internal_port, ram, cpu)
+    cmd = "sudo docker run --network=software_collections --name %s -p %s:%s --memory=%s --cpus=%s" % (container_name, external_port, internal_port, ram, cpu)
     # add env variables if not empty
     if env.strip() :
         env = env.split("\n")

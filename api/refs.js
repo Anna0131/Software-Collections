@@ -11,7 +11,7 @@ router.get('/', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-	    	const refs_name = await conn.query("select name, val from ref where root_only=False or root_only in (select role_id from user where user_id = ?);", user_id);
+	    	const refs_name = await conn.query("select name, val from ref where root_only=False or root_only in (select -role_id+4 from user where user_id = ?);", user_id);
 		res.json({suc : true, refs_name});
 	    }
 	    catch(e) {

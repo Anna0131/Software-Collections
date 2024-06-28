@@ -11,7 +11,7 @@ create table user (
     `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `role_id` int(10) NOT NULL ,
     `name` varchar(30) NOT NULL,
-    `password` varchar(30) DEFAULT NULL,
+    `password` varchar(100) DEFAULT NULL,
     `email` varchar(30) DEFAULT NULL,
     `s_num` int(20) DEFAULT NULL,
     `total_credit` int(10) DEFAULT 0,
@@ -113,21 +113,21 @@ create table general_settings (
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /* All the roles of user */
-insert into role(name) values("admin");
-insert into role(name) values("teacher");
 insert into role(name) values("student");
+insert into role(name) values("teacher");
+insert into role(name) values("admin");
 
 /* All the links that can be used by the user */
 insert into ref(name, val, root_only) values("主頁面", "main", FALSE);
 insert into ref(name, val, root_only) values("使用者資訊", "user", FALSE);
 insert into ref(name, val, root_only) values("申請部屬軟體", "apply", FALSE);
 insert into ref(name, val, root_only) values("軟體開發需求", "requirement", FALSE);
+insert into ref(name, val, root_only) values("審核軟體申請", "audit", TRUE);
 insert into ref(name, val, root_only) values("系統設定", "settings", TRUE);
-insert into ref(name, val, root_only) values("系統教學", "tutorials", FALSE);
-insert into ref(name, val, root_only) values("審核軟體申請", "audit", FALSE);
+insert into ref(name, val, root_only) values("系統教學", "tutorial", FALSE);
 
 /* Default user */
-insert into user(role_id, name, password, total_credit, s_num) values(1, "test", "123", 100, 1);
+insert into user(role_id, name, password, total_credit, s_num) values(3, "im_admin", "31004088-4938-48c2-9602-865e9f3a6781", 100, 1);
 
 /* Default gerneral settings */
 insert into general_settings values("max_application_nums", 3);

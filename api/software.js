@@ -4,20 +4,28 @@ const util = require("./../utilities/utilities.js");
 const sendEmail = require("./../utilities/sendEmail.js");
 const jwt = require('jsonwebtoken');
 
-function informApplicant(external_port, software_id, user_info) {
+function informApplicant(external_port, software_id, user_info, container_name) {
     // send the email to inform the agreement of project to the person who applied this project
     const new_line = "<br/>";
     const software_url = util.getUrlRoot(util.system_url) + ':' + external_port;
     const receivers = [user_info.email];
     const topic = "軟體庫系統通知 - 申請成功通過";
     let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
-    content += `此軟體已部屬於：${software_url}`;
+    content += `容器名稱：${container_name}`;
+    content += `已成功部屬於：${software_url}`;
     sendEmail.send(receivers, topic, content);
 }
 
-function ckUserPrivileges(user_id) {
+async function ckUserPrivileges(user_id) {
     // check whether the privilege of user is not enough to agree the upload of software
-    return true;
+    const role_id = await util.getUserRole(user_id);
+    if (role_id == 3) {
+        // super user's role id is 3
+	return true;
+    }
+    else {
+	return false;
+    }
 }
 
 // create container by pulling the image from docker hub
@@ -107,7 +115,42 @@ router.get('/', async function(req, res) {
     }
 });
 
-// return the data of softwares which are upload successfully
+// return the data of softwares which are not upload successfully
+router.get('/not_passed', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    // check the user id have admin or teacher permisssion
+	    if (!util.is_numeric(user_id) || util.getUserRole(user_id) < 1) {
+		return res.json({suc : false, msg : "invalid credentials"});
+	    }
+	    let softwares;
+	    let conn;
+	    try {
+	    	conn = await util.getDBConnection(); // get connection from db
+		softwares = await conn.query("select s.software_id, s.topic, s.description, s.create_time, u.name, u.user_id from software as s, user as u where s.success_upload = 0 and u.user_id = s.owner_user_id;"); // return the necessary data which will be display on the page of main
+	    	res.json({suc : true, softwares});
+	    }
+	    catch(e) {
+		console.error(e);
+		res.json({suc : false});
+	    }
+	    finally {
+		util.closeDBConnection(conn); // close db connection
+	    }
+	}
+	else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "login failed"});
+    }
+});
+
+// return the all software info of the user
 router.get('/self', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
@@ -174,6 +217,34 @@ function validNewView(software_last_view_time, res, software_id) {
     }
 }
 
+async function validCheckContainerInfo(user_id, software_id) {
+    // only the owner and super user can check the unapproved container info
+    let conn;
+    try {
+    	conn = await util.getDBConnection(); // get connection from db
+	// check the user is the owner or the software is approved
+	const is_owner = await conn.query("select COUNT(*) from software where software_id = ? and (owner_user_id = ? or success_upload = 1);", [software_id, user_id]);
+	if (is_owner[0]["COUNT(*)"]) {
+	    return true;
+	}
+	else {
+	    const is_superuser = await conn.query("select role_id from user where user_id = ?;", [user_id]);
+	    if (is_superuser[0]["role_id"] > 1) {
+		// not a normal user
+		return true;
+	    }
+	    return false;
+	}
+    }
+    catch(e) {
+	console.error(e);
+	return false;
+    }
+    finally {
+	util.closeDBConnection(conn); // close db connection
+    }    
+}
+
 // return the data of a specify software with software id, which is upload successfully
 router.get('/specify', async function(req, res) {
     try {
@@ -183,6 +254,11 @@ router.get('/specify', async function(req, res) {
 	    let software_id = req.query.software_id; // get user id from query string
 	    let software_info;
 	    let conn;
+	    // only the owner and super user can check the unapproved container info
+	    const authen_result = await validCheckContainerInfo(user_id, software_id);
+	    if (!authen_result) {
+		return res.json({suc : false, msg : "not enough privileged to check the unapproved container info"});
+	    }
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 		// get the info of software
@@ -285,9 +361,10 @@ router.get('/agreement', async function(req, res) {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
-	    if (!ckUserPrivileges(user_id)) {
+	    const authen_result = await ckUserPrivileges(user_id);
+	    if (!authen_result) {
 		// privilege of user is not enough to agree the upload of software
-		res.json({msg : "privilege of user is not enough to agree the upload of software"});
+		return res.json({msg : "your privilege is not enough to approve the upload of software"});
 	    }
 	    // update the status of software to upload allowed, and do the other works to create service 
 	    const software_id = req.query.software_id;
@@ -304,39 +381,67 @@ router.get('/agreement', async function(req, res) {
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
-	    // pull app image from docker hub, and create the container on the docker server
 	    try {
-		const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes);
-		if (container_create[0] == false) {
-		    // failed to create container, return the error msg
-		    res.json({msg : "failed to create container : " + container_create[1]}); 
+		// check whether the application includes deploying the container
+		if (!util.isEmptyStr(software_info[0].docker_image)) {
+	            // pull app image from docker hub, and create the container on the docker server
+		    const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes);
+		    if (container_create[0] == false) {
+		        // failed to create container, return the error msg
+		        res.json({msg : "failed to create container : " + container_create[1]}); 
+		    }
+		    else {
+		        // create container successfully
+		        // return the external port which the service is deployed on it, and update to the data in db
+
+		        const external_port = container_create[1];
+		        const container_name = container_create[2];
+		        let user_info;
+	    	        try {
+	    		    conn = await util.getDBConnection(); // get connection from db
+	    		    await conn.query("update software set external_port = ?, container_name = ?, success_upload = 1  where software_id = ?;", [external_port, container_name, software_id]);
+			    // get the info of user to send back the email
+			    user_info = await conn.query("select * from user where user_id = ?", user_id);
+	    	        }
+	       	        catch(e) {
+			    console.error(e);
+			    res.json({suc : false});
+	    	        }
+	    	        finally {
+			    util.closeDBConnection(conn); // close db connection
+	    	        }
+		    
+		        // send the email to inform the approval to the applicant
+		        informApplicant(external_port, software_id, user_info[0], container_name);
+		    
+		        res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/audit';</script>");
+		    }
 		}
 		else {
-		    // create container successfully
-		    // return the external port which the service is deployed on it, and update to the data in db
-
-		    const external_port = container_create[1];
-		    const container_name = container_create[2];
-		    let user_info;
+		    // no need to create container
 	    	    try {
-	    		conn = await util.getDBConnection(); // get connection from db
-	    		await conn.query("update software set external_port = ?, container_name = ?, success_upload = 1  where software_id = ?;", [external_port, container_name, software_id]);
-			// get the info of user to send back the email
-			user_info = await conn.query("select * from user where user_id = ?", user_id);
+	    	        conn = await util.getDBConnection(); // get connection from db
+	    	        await conn.query("update software set success_upload = 1  where software_id = ?;", [software_id]);
+		        // get the info of user to send back the email
+		        user_info = await conn.query("select * from user where user_id = ?", user_id);
+
+		        // send the email to inform the approval to the applicant
+			const receivers = [user_info[0].email]; 
+    			const topic = "軟體庫系統通知 - 申請成功通過";
+    			const new_line = "<br/>";
+    			const content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
+			sendEmail.send(receivers, topic, content);
+
+			// response
+		        res.send("<script>alert('審核成功！');window.location.href = '/audit';</script>");
 	    	    }
-	    	    catch(e) {
-			console.error(e);
-			res.json({suc : false});
+	       	    catch(e) {
+		        console.error(e);
+		        res.json({suc : false, msg : e});
 	    	    }
 	    	    finally {
-			util.closeDBConnection(conn); // close db connection
+		        util.closeDBConnection(conn); // close db connection
 	    	    }
-		    
-		    // send the email to inform the agreement of project to the person who applied this project
-		    informApplicant(external_port, software_id, user_info[0]);
-		    
-	    	    //res.json({suc : "true", external_port});
-		    res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/main';</script>");
 		}
 	    }
 	    catch (e) {
@@ -492,7 +597,9 @@ async function containerOwner(container_name) {
     try {
     	conn = await util.getDBConnection(); // get connection from db
 	owner_id = await conn.query("select owner_user_id from software where container_name = ?", [container_name]);
-	owner_id = owner_id[0]["owner_user_id"];
+	if (owner_id[0] != undefined) {
+	    owner_id = owner_id[0]["owner_user_id"];
+	}
     }
     catch(e) {
 	console.error(e);
@@ -513,6 +620,9 @@ router.get('/info/logs', async function(req, res) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const container_name = await getContainerName(software_id);
 	    const owner_user_id = await containerOwner(container_name);
+	    if (container_name==null) {
+		return res.json({suc : false, msg : "container can not be null"});
+	    }
 	    if (owner_user_id == user_id) {
 	        const result = await getContainerLog(container_name);
 	        if (result[0] && result[1] != "false") {
@@ -610,7 +720,7 @@ router.get('/info/resourceUsage', async function(req, res) {
 	if (result) {
 	    const software_id = req.query.software_id;
 	    const container_name = await getContainerName(software_id);
-	    if (container_name=="null") {
+	    if (container_name==null) {
 		return res.json({suc : false, msg : "container can not be null"});
 	    }
 	    else {
