@@ -108,7 +108,7 @@ async function showSoftwareCollections() {
 	// set the container info if the user is owner
 	await sleep(100); // prevent from getting default user info as too early to fetch innerHTML
 	const s_num = document.getElementById("user_info").innerHTML.split(" ")[0];
-	if (s_num == software_info.user_id) {
+	if (s_num == software_info.s_num) {
 	    setEditSoftware();
 	    setContainerLogs(software_info.external_port, software_info.software_id);
 	    setContainerResourceUsage(software_info.external_port, software_info.software_id);

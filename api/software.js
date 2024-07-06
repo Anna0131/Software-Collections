@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 
 function informApplicant(external_port, software_id, user_info, container_name) {
     // send the email to inform the agreement of project to the person who applied this project
+    console.log(user_info.email);
     const new_line = "<br/>";
     const software_url = util.getUrlRoot(util.system_url) + ':' + external_port;
     const receivers = [user_info.email];
@@ -262,7 +263,7 @@ router.get('/specify', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 		// get the info of software
-		software_info = await conn.query("select s.success_upload, s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.user_id from software as s, user as u where u.user_id = s.owner_user_id and s.software_id = ?;", [software_id]); // return the necessary data which will be display on the page of main
+		software_info = await conn.query("select s.success_upload, s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.s_num from software as s, user as u where u.user_id = s.owner_user_id and s.software_id = ?;", [software_id]); // return the necessary data which will be display on the page of main
 		software_info = software_info[0];
 		// add the view nums
 		const cookie_name = `software_${software_id}_last_view_time`;
@@ -402,6 +403,7 @@ router.get('/agreement', async function(req, res) {
 	    		    await conn.query("update software set external_port = ?, container_name = ?, success_upload = 1  where software_id = ?;", [external_port, container_name, software_id]);
 			    // get the info of user to send back the email
 			    user_info = await conn.query("select * from user where user_id = ?", user_id);
+				console.log(user_id, user_info);
 	    	        }
 	       	        catch(e) {
 			    console.error(e);

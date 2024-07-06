@@ -87,7 +87,7 @@ async function overApplicationLimit(user_id) {
     let max_application_nums;
     try {
     	conn = await util.getDBConnection(); // get connection from db
-	const date = new Date().toLocaleDateString();
+	const date = new Date();
 	const result = await conn.query("select COUNT(*) from software where owner_user_id = ? and create_time >= ?;", [user_id, date]); // return the nums of application of this user in today
     	application_nums = result[0]["COUNT(*)"];
 	max_application_nums = await conn.query("select value from general_settings where settings_name = 'max_application_nums';");
@@ -135,7 +135,6 @@ router.post('/info', async function(req, res) {
 	    const topic = req.body.topic;
 	    const tags = req.body.tags.split("、");
 	    const description = req.body.description;
-	    const name = req.body.name; // user name
 	    // docker spec
 	    const docker_image = req.body.docker_image;
 	    const domain = req.body.domain;
@@ -159,8 +158,13 @@ router.post('/info', async function(req, res) {
 	    // insert data into db
 	    let conn;
 	    let software_id;
+	    let name;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
+		// get user name
+		name = await conn.query("select name from user where user_id = ?", user_id);
+		name = name[0]["name"];
+
 		// Start Transaction
 		await conn.beginTransaction();
 		// software
