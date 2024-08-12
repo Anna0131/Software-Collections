@@ -27,6 +27,7 @@ async function showSoftwareCollections() {
     	const tab = document.getElementById("tab_software_collections");
     	// loop to put data into table
     	for (let i = 0;i < softwares.length;i++) { 
+			sanitizeObj(DOMPurify.sanitize, softwares[i]);
 	    let url = getUrlRoot() + ":" + softwares[i].external_port; // make the url of project with external port and root of current url
 	    let user_info = getUrlRootWithPort() + `/user?user_id=${softwares[i].user_id}`;
 	    tab.innerHTML += 
@@ -78,6 +79,9 @@ async function showMySoftwareCollections() {
     	const tab = document.getElementById("tab_my_software_collections");
     	// loop to put data into table
     	for (let i = 0;i < softwares.length;i++) { 
+			console.log( softwares[i].view_nums)
+			sanitizeObj(DOMPurify.sanitize, softwares[i]);
+			console.log( softwares[i].view_nums)
 	    let url = getUrlRoot() + ":" + softwares[i].external_port; // make the url of project with external port and root of current url
 	    tab.innerHTML += 
 	    "<tr/><td/>"+ softwares[i].software_id +  

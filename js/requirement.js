@@ -25,6 +25,7 @@ async function showRequirements() {
     	// loop to put data into table
 	 console.log(result);
     	for (let i = 0;i < result.length;i++) { 
+			sanitizeObj(DOMPurify.sanitize, result[i]);
 	    let user_info = getUrlRootWithPort() + `/user?user_id=${result[i].user_id}`;
 	    tab.innerHTML += 
 	    "<tr/><td/>"+ result[i].req_id +  
@@ -51,11 +52,12 @@ async function postApplyInfo() {
     result = result.data;
     console.log(result);
     if (result.suc == true) {
-	alert("申請已成功送出");
+		alert("申請已成功送出");
     }
     else {
-	alert("申請無法正確送出" + result.msg);
+		alert("申請無法正確送出" + result.msg);
     }
+	window.location.reload();
 }
 setUserInfo();
 showRequirements();

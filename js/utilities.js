@@ -87,3 +87,14 @@ function logout() {
     window.location.href="/main";
 }
 
+
+function sanitizeObj(sanitize, obj) {
+	const keys = Object.keys(obj);
+	for (let i = 0;i < keys.length;i++) {
+		if (obj[keys[i]] == '0') {
+			continue;	
+		}
+		obj[keys[i]] = sanitize(obj[keys[i]]);
+	}
+	return obj;
+}

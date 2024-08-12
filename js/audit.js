@@ -31,6 +31,7 @@ async function setTabApplication() {
 	 // set the data
 	const tab = document.getElementById("tab_software_application");
         for (let i = 0;i < not_passed_application.softwares.length;i++) {
+			sanitizeObj(DOMPurify.sanitize, not_passed_application.softwares[i]);
 	    const user_info = getUrlRootWithPort() + `/user?user_id=${not_passed_application.softwares[i].user_id}`;
 	    tab.innerHTML += 
 	    "<tr/><td/>"+ not_passed_application.softwares[i].software_id +  

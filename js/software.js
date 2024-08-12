@@ -87,6 +87,7 @@ async function showSoftwareCollections() {
     const data = await getSoftwareInfo();
     const suc = data.suc;
     const software_info = data.software_info;
+	sanitizeObj(DOMPurify.sanitize, software_info);
     if (suc) {
     	const tab = document.getElementById("software_info");
 	let url = getHost() + ":" + software_info.external_port; // make the url of project with external port and root of current url
@@ -142,6 +143,7 @@ async function showBulletin() {
     	const tab = document.getElementById("bulletin");
 	for (let i = 0;i < bulletin.length;i++) {
     	    // loop to put data into table
+		sanitizeObj(DOMPurify.sanitize, bulletin[i]);
 	    let url = getUrlRoot() + ":" + bulletin[i].external_port; // make the url of project with external port and root of current url
 	    let user_info = getUrlRootWithPort() + `/user?user_id=${bulletin[i].comment_user_id}`;
 	    tab.innerHTML += 

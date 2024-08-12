@@ -27,6 +27,7 @@ async function showSpecifyUserInfo() {
 	setHeadshot(data.user_id);
     	const tab = document.getElementById("tab_user_info");
     	// loop to put data into table
+	sanitizeObj(DOMPurify.sanitize, data);
 	tab.innerHTML += 
 	    "<tr/><td/>"+ data.user_id +  
 	    "<td>" + data.s_num + "</td>" +
