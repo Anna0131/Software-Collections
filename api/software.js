@@ -428,13 +428,13 @@ router.get('/agreement', async function(req, res) {
 		        user_info = await conn.query("select * from user where user_id = ?", user_id);
 
 		        // send the email to inform the approval to the applicant
-			const receivers = [user_info[0].email]; 
+				const receivers = [user_info[0].email]; 
     			const topic = "軟體庫系統通知 - 申請成功通過";
     			const new_line = "<br/>";
     			const content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
-			sendEmail.send(receivers, topic, content);
+				sendEmail.send(receivers, topic, content);
 
-			// response
+				// response
 		        res.send("<script>alert('審核成功！');window.location.href = '/audit';</script>");
 	    	    }
 	       	    catch(e) {
@@ -458,6 +458,57 @@ router.get('/agreement', async function(req, res) {
     catch(e) {
         console.log(e);
 	res.redirect("/login");
+    }
+});
+
+// finish the application of creating container when admin press the agree button in email
+router.get('/disagreement', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const authen_result = await ckUserPrivileges(user_id);
+	    if (!authen_result) {
+			// privilege of user is not enough to agree the upload of software
+			return res.json({msg : "your privilege is not enough to approve the upload of software"});
+	    }
+	    const software_id = req.query.software_id;
+		const rej_msg = req.query.msg;
+		if (rej_msg == undefined) {
+			// let manager to input the reason about why disagree the application
+			res.send("<script>const msg = prompt('輸入為何拒絕申請');const searchParams = new URLSearchParams(window.location.search);searchParams.set('msg', msg);window.location.search = searchParams.toString();</script>");
+		}
+		else {
+			// inform the applicant that the application is rejected and the reason
+			res.redirect("/main");
+	    	try {
+	    	    conn = await util.getDBConnection(); // get connection from db
+		        // get the info of user to send back the email
+		        user_info = await conn.query("select * from user where user_id = ?", user_id);
+
+		        // send the email to inform the approval to the applicant
+				const receivers = [user_info[0].email]; 
+    			const topic = "軟體庫系統通知 - 申請失敗";
+    			const new_line = "<br/>";
+    			const content = `您好，您申請的軟體編號 : ${software_id}，申請已被拒絕${new_line}理由：${rej_msg}`;
+				sendEmail.send(receivers, topic, content);
+	    	}
+	       	catch(e) {
+		        console.error(e);
+		        res.json({suc : false, msg : e});
+	    	}
+	    	finally {
+		    	util.closeDBConnection(conn); // close db connection
+	    	}
+		}
+	}
+	else {
+	    res.redirect("/login");
+        }
+    }
+    catch(e) {
+        console.log(e);
+		res.redirect("/login");
     }
 });
 

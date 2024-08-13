@@ -76,6 +76,8 @@ function mkContent(name, topic, tags, description, docker_image, domain, create_
     content += "申請時間：" + create_time + new_line;
     // button of agreement
     content += `<button><a style='text-decoration: none;color: black;' href='${util.system_url}/api/software/agreement?software_id=${software_id}'>同意申請</a></button>`;
+	// button of disagreement
+    content += `&nbsp;<button><a style='text-decoration: none;color: black;' href='${util.system_url}/api/software/disagreement?software_id=${software_id}'>拒絕申請</a></button>`;
     // end of content
     content += "</html>";
     return content;
