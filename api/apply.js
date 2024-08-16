@@ -10,7 +10,7 @@ function ckFormat(topic, tags, description, docker_image, domain, internal_port,
 	    // check whether required column is empty
 	    return {result : false, msg : "required column is empty"};
 	}
-	// check the format of env and volumes if not empty
+	// check the format of env and volumes if one of them are not empty
 	// env
 	if (!util.isEmptyStr(env)) {
 	    env = env.split("\n");

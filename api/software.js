@@ -12,7 +12,7 @@ function informApplicant(external_port, software_id, user_info, container_name) 
     const receivers = [user_info.email];
     const topic = "軟體庫系統通知 - 申請成功通過";
     let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
-    content += `容器名稱：${container_name}`;
+    content += `容器名稱：${container_name}` + new_line;
     content += `已成功部屬於：${software_url}`;
     sendEmail.send(receivers, topic, content);
 }
@@ -59,7 +59,7 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
             pythonProcess.on('error', (err) => {
                 console.error(err);
                 // reject(err); // 子進程啟動失敗
-                //resolve([false, "failed to create container : " + error]); // failed to create container, return the error msg
+                resolve([false, "failed to create container : " + error]); // failed to create container, return the error msg
             });
 
             pythonProcess.stdout.on('data', (data) => {
@@ -578,7 +578,7 @@ router.delete('/', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 	    	container_name = await getContainerName(software_id);
-		await conn.query("delete from software where software_id = ? and owner_user_id = ?", [software_id, user_id]);
+			await conn.query("delete from software where software_id = ? and owner_user_id = ?", [software_id, user_id]);
 	    	res.json({suc : true});
 	    }
 	    catch(e) {
@@ -663,6 +663,31 @@ async function containerOwner(container_name) {
     return owner_id;
 }
 
+router.get('/info/name', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const software_id = req.query.software_id;
+	    // only show the docker log message on owner page
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const container_name = await getContainerName(software_id);
+	    const owner_user_id = await containerOwner(container_name);
+	    if (container_name==null) {
+			return res.json({suc : false, msg : "container can not be null"});
+	    }
+	    if (owner_user_id == user_id) {
+		    res.json({suc : true, result : container_name});
+		}
+	}
+	else {
+        res.json({msg : "login failed"});
+    }
+	}
+    catch(e) {
+        console.log(e);
+        res.json({msg : "error occured"});
+    }
+});
 
 router.get('/info/logs', async function(req, res) {
     try {

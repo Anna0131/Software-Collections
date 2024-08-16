@@ -38,27 +38,58 @@ router.get('/', async function(req, res) {
 // post a requirement
 router.post('/', async function(req, res) {
     try {
-	const result = await util.authenToken(req.cookies.token);
-	if (result) {
-	    const user_id = await util.getTokenUid(req.cookies.token);
-	    const topic = req.body.topic;
-	    const description = req.body.description;
-	    const awarded_credit = req.body.awarded_credit;
-	    const datetime = new Date();
-	    let conn;
-	    try {
-	    	conn = await util.getDBConnection(); // get connection from db
-	    	await conn.query("insert into requirement(user_id, topic, description, awarded_credit, time) values(?, ?, ?, ?, ?);", [user_id, topic, description, awarded_credit, datetime]);
-		res.json({suc : true});
-	    }
-	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
-	    }
-	    finally {
-		util.closeDBConnection(conn); // close db connection
-	    }
+		const result = await util.authenToken(req.cookies.token);
+		if (result) {
+	    	const user_id = await util.getTokenUid(req.cookies.token);
+	    	const topic = req.body.topic;
+	    	const description = req.body.description;
+	    	const awarded_credit = req.body.awarded_credit;
+	    	const datetime = new Date();
+	    	let conn;
+	    	try {
+	    		conn = await util.getDBConnection(); // get connection from db
+	    		await conn.query("insert into requirement(user_id, topic, description, awarded_credit, time) values(?, ?, ?, ?, ?);", [user_id, topic, description, awarded_credit, datetime]);
+				res.json({suc : true});
+	    	}
+	    	catch(e) {
+				console.error(e);
+				res.json({suc : false});
+	    	}
+	    	finally {
+				util.closeDBConnection(conn); // close db connection
+	    	}
+    	}
+        else {
+            res.json({msg : "login failed"});
         }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "login failed"});
+    }
+});
+
+// delete a requirement
+router.delete('/', async function(req, res) {
+    try {
+		const result = await util.authenToken(req.cookies.token);
+		if (result) {
+	    	const user_id = await util.getTokenUid(req.cookies.token);
+	    	const req_id = req.body.req_id;
+	    	let conn;
+	    	try {
+	    		conn = await util.getDBConnection(); // get connection from db
+				await conn.query("delete from requirement where req_id = ? and user_id = ?", [req_id, user_id]);
+				res.json({suc : true});
+	    	}
+	    	catch(e) {
+				console.error(e);
+				res.json({suc : false});
+	    	}
+	    	finally {
+				util.closeDBConnection(conn); // close db connection
+	    	}
+    	}
         else {
             res.json({msg : "login failed"});
         }

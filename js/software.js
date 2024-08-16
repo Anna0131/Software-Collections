@@ -38,10 +38,26 @@ async function getContainerResourceUsage(software_id) {
     return result.data;
 }
 
+async function getContainerName(software_id) {
+    //get the info of the resource usage by this container
+    const result = await axios.get(`/api/software/info/name?software_id=${software_id}`);
+    return result.data;
+}
+
+async function setContainerName(software_id) {
+    const container_name = await getContainerName(software_id);
+    if (container_name.suc) {
+    	document.getElementById("container_name").innerHTML = container_name.result;
+    }
+    else {
+		console.log(container_name.msg);
+    }
+}
+
 async function setContainerLogs(external_port, software_id) {
     const container_logs = await getContainerLogs(software_id);
     if (container_logs.suc) {
-	document.getElementById("container_info").style.display = "block";
+		document.getElementById("container_info").style.display = "block";
     	document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
     }
     else {
@@ -112,6 +128,7 @@ async function showSoftwareCollections() {
 	if (s_num == software_info.s_num) {
 	    setEditSoftware();
 	    setContainerLogs(software_info.external_port, software_info.software_id);
+		setContainerName(software_id);
 	    setContainerResourceUsage(software_info.external_port, software_info.software_id);
 	}
     }
