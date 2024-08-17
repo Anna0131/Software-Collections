@@ -14,6 +14,53 @@
             <button id = 'sub' onclick = "submit()">提交</button>
         </div>
     </body>
+	<!-- loading animation-->
+    <title>Loading Spinner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; 
+            border-top: 8px solid #3498db; 
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite; 
+            margin-bottom: 20px;
+			display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+	</style>
+	<!-- 加载动画 -->
+    <div class="spinner"></div>
     <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>
     <script src = "js/login.js"></script>
 </html>
