@@ -363,8 +363,8 @@ router.get('/agreement', async function(req, res) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const authen_result = await ckUserPrivileges(user_id);
 	    if (!authen_result) {
-		// privilege of user is not enough to agree the upload of software
-		return res.json({msg : "your privilege is not enough to approve the upload of software"});
+			// privilege of user is not enough to agree the upload of software
+			return res.json({msg : "your privilege is not enough to approve the upload of software"});
 	    }
 	    // update the status of software to upload allowed, and do the other works to create service 
 	    const software_id = req.query.software_id;

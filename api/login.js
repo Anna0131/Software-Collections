@@ -107,7 +107,7 @@ async function blockBruteForce(ip) {
 	let is_blocked = true;
 	const MS_PER_MINUTE = 60000;
 	const time = new Date();
-	const period_start = new Date(time - block_rule.period * MS_PER_MINUTE);;
+	const period_start = new Date(time - block_rule.period * MS_PER_MINUTE);
 	try {
 		conn = await util.getDBConnection(); // get connection from db
 		// get the number of failure in the period of this ip
@@ -145,7 +145,7 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
 	        // login successfully
 	        const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
                 data = {uid : user_id};
-                const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
+                const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
                 res.cookie("token", token);
             }
             else {
@@ -155,7 +155,7 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
 	            // login successfully
 	            authen_result = user_id;
                     data = {uid : user_id};
-                    const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, util.jwt_key);
+                	const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
                     res.cookie("token", token);
 	        }
 	        else {

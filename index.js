@@ -32,6 +32,9 @@ app.use(fileupload({
 
 // routing
 // pages
+app.get("/", (req, res) => {
+    res.redirect("/main");
+});
 app.use("/login", require("./pages/login.js"));
 app.use("/main", require("./pages/main.js"));
 app.use("/user", require("./pages/user.js"));

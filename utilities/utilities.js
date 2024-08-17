@@ -19,6 +19,7 @@ module.exports = {
     jwt_key,
 
     // shared function
+
     loginAuthentication: function(account, password) {
         return new Promise((resolve, reject) => { // 包裝成 Promise
             const spawn = require("child_process").spawn;
@@ -166,5 +167,17 @@ module.exports = {
 	finally {
 	    this.closeDBConnection(conn); // close db connection
 	}
-    }
+    },
+
+    ckUserPrivileges: async function(user_id) {
+    	// check whether the privilege of user is not enough to agree the upload of software
+    	const role_id = await this.getUserRole(user_id);
+    	if (role_id == 3) {
+        	// super user's role id is 3
+			return true;
+    	}
+    	else {
+			return false;
+    	}
+	},
 };

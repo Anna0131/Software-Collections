@@ -7,6 +7,12 @@ router.post('/', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const authen_result = await util.ckUserPrivileges(user_id);
+	    if (!authen_result) {
+			// privilege of user is not enough to agree the upload of software
+			return res.json({msg : "your privilege is not enough to approve the upload of software"});
+	    }
 	    const account_type = req.body.type; // type of account
 	    const total_credit = req.body.total_credit; // credit nums which can be used by this account
 	    const account = req.body.account; // name of this account
@@ -53,6 +59,7 @@ router.post('/', async function(req, res) {
     }
 });
 
+// get docker spec is no need for the manager privilege, as these infos need to be display on apply page.
 router.get('/dockerSpec', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
@@ -61,7 +68,7 @@ router.get('/dockerSpec', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 	    	const result = await conn.query("select * from docker_spec;");
-		res.json({suc : true, result});
+			res.json({suc : true, result});
 	    }
 	    catch(e) {
 		console.error(e);
@@ -91,6 +98,12 @@ router.post('/dockerSpec', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const authen_result = await util.ckUserPrivileges(user_id);
+	    if (!authen_result) {
+			// privilege of user is not enough to agree the upload of software
+			return res.json({msg : "your privilege is not enough to approve the upload of software"});
+	    }
 	    const ram = req.body.ram; // spec of ram
 	    const cpu = req.body.cpu; // spec of cpu
 	    const disk = req.body.disk; // spec of cpu
@@ -150,6 +163,12 @@ router.post('/max_application_nums', async function(req, res) {
     try {
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const authen_result = await util.ckUserPrivileges(user_id);
+	    if (!authen_result) {
+			// privilege of user is not enough to agree the upload of software
+			return res.json({msg : "your privilege is not enough to approve the upload of software"});
+	    }
 	    const max_application_nums = req.body.max_nums; //
 	    let conn;
 	    try {

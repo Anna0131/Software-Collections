@@ -1,5 +1,15 @@
 <html>
 	<style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+
         div {
             border-radius: 8px;
             background-color: #ffffff;
@@ -30,8 +40,18 @@
             outline: none;
         }
 
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+		}
+
         body {
-            background-color: #f7f7f7;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -59,14 +79,12 @@
         }
 
         button {
-            transition: background-color 0.3s;
-			width: 100%;
-            padding: 10px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
+            padding: 10px 20px;
             font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
@@ -79,12 +97,21 @@
         <title>
             登入頁面
         </title>
-    	<div class="spinner"></div>
         <h1>
-            NCNU IM 軟體庫
+            登入頁面
         </h1>
     </head>
+	<!--
+    <body>
+        <div>
+            帳號：<input type = 'text' name = 'account' id = 'account'/>
+            密碼：<input type= "password" name="password" id = "password"/>
+            <button id = 'sub' onclick = "submit()">提交</button>
+        </div>
+    </body>
+	-->
 <body>
+
     <div>
         <label for="account">帳號：</label>
         <input type="text" name="account" id="account" />
@@ -98,6 +125,7 @@
 </body>
     <style>
 	</style>
+    <div class="spinner"></div>
     <script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js' ></script>
     <script src = "js/login.js"></script>
 </html>
