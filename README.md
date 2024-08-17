@@ -1,4 +1,5 @@
 # 軟體庫-作品集 系統
+#### 系統文件說明：https://hackmd.io/QscYPE9jRGe5qd3W6Hn5rQ?view
 
 ## 系統功能
 學生登入：學生可使用學號和密碼登入系統。
