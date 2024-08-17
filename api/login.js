@@ -14,6 +14,7 @@ async function insertUser(account, name) {
 		if (user.length == 0) {
 			let role_id; // check the role_id of different role with length of account
 			let total_credit;
+			let email = null;
 			if (account.length == 5) {
 			// account of teacher or other school employee
 			total_credit = 10000;
@@ -21,12 +22,13 @@ async function insertUser(account, name) {
 			role_id = role_id[0].role_id;
 			}
 			else {
-			// account of student
-			total_credit = 0;
+				// account of student
+				total_credit = 0;
 				role_id = await conn.query("select role_id from role where name = ?;", "student");
-			role_id = role_id[0].role_id;
+				role_id = role_id[0].role_id;
+				email = `s${account}@mail1.ncnu.edu.tw`;
 			}
-			const result = await conn.batch('insert into user(role_id, name, total_credit, s_num) values(?,?,?,?);', [role_id, name, total_credit, account]);
+			const result = await conn.batch('insert into user(role_id, name, total_credit, s_num, email) values(?,?,?,?,?);', [role_id, name, total_credit, account, email]);
 			user_id = result.insertId;
 			await conn.commit(); // commit changes
 		}
@@ -134,7 +136,7 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
 	const is_blocked = await blockBruteForce(req.ip);
 	if (is_blocked) {
 	    suc = false;
-	    res.json({suc : suc, authen_result : "You are blocked as the violation of exceeding the failure login numbers"});
+	    res.json({suc : suc, authen_result : "You are blocked as the violation of exceeding the failure login times"});
 	}
 	else {
 

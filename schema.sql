@@ -45,6 +45,7 @@ create table software (
     `avg_score` int(10) DEFAULT 0 ,
     `create_time` datetime NOT NULL,
     `success_upload` boolean DEFAULT FALSE,
+    `rejected` boolean DEFAULT FALSE,
     `internal_port` int(5) NULL,
     `external_port` int(5) NULL,
     `view_nums` int(10) DEFAULT 0,

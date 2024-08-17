@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 
 function informApplicant(external_port, software_id, user_info, container_name) {
     // send the email to inform the agreement of project to the person who applied this project
-    console.log(user_info.email);
     const new_line = "<br/>";
     const software_url = util.getUrlRoot(util.system_url) + ':' + external_port;
     const receivers = [user_info.email];
@@ -130,7 +129,7 @@ router.get('/not_passed', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-		softwares = await conn.query("select s.software_id, s.topic, s.description, s.create_time, u.name, u.user_id from software as s, user as u where s.success_upload = 0 and u.user_id = s.owner_user_id;"); // return the necessary data which will be display on the page of main
+			softwares = await conn.query("select s.software_id, s.topic, s.description, s.create_time, u.name, u.user_id from software as s, user as u where s.success_upload = 0 and s.rejected = 0 and u.user_id = s.owner_user_id;"); // return the softwares which are not passed the approval and have not been rejected
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
@@ -395,15 +394,14 @@ router.get('/agreement', async function(req, res) {
 		        // create container successfully
 		        // return the external port which the service is deployed on it, and update to the data in db
 
-		        const external_port = container_create[1];
+		        const external_port = container_create[1] == "null" ? null : container_create[1];
 		        const container_name = container_create[2];
 		        let user_info;
 	    	        try {
 	    		    conn = await util.getDBConnection(); // get connection from db
 	    		    await conn.query("update software set external_port = ?, container_name = ?, success_upload = 1  where software_id = ?;", [external_port, container_name, software_id]);
-			    // get the info of user to send back the email
-			    user_info = await conn.query("select * from user where user_id = ?", user_id);
-				console.log(user_id, user_info);
+			    	// get the info of user to send back the email
+			    	user_info = await conn.query("select * from user where user_id in (select owner_user_id from software where software_id = ?);", software_id);
 	    	        }
 	       	        catch(e) {
 			    console.error(e);
@@ -413,7 +411,7 @@ router.get('/agreement', async function(req, res) {
 			    util.closeDBConnection(conn); // close db connection
 	    	        }
 		    
-		        // send the email to inform the approval to the applicant
+		        // send the email to inform the approval message to the applicant
 		        informApplicant(external_port, software_id, user_info[0], container_name);
 		    
 		        res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/audit';</script>");
@@ -475,16 +473,16 @@ router.get('/disagreement', async function(req, res) {
 	    const software_id = req.query.software_id;
 		const rej_msg = req.query.msg;
 		if (rej_msg == undefined) {
-			// let manager to input the reason about why disagree the application
+			// let manager to input the reason about why reject the application
 			res.send("<script>const msg = prompt('輸入為何拒絕申請');const searchParams = new URLSearchParams(window.location.search);searchParams.set('msg', msg);window.location.search = searchParams.toString();</script>");
 		}
 		else {
 			// inform the applicant that the application is rejected and the reason
-			res.redirect("/main");
+			res.redirect("/audit");
 	    	try {
 	    	    conn = await util.getDBConnection(); // get connection from db
 		        // get the info of user to send back the email
-		        user_info = await conn.query("select * from user where user_id = ?", user_id);
+			    user_info = await conn.query("select * from user where user_id in (select owner_user_id from software where software_id = ?);", software_id);
 
 		        // send the email to inform the approval to the applicant
 				const receivers = [user_info[0].email]; 
@@ -492,6 +490,9 @@ router.get('/disagreement', async function(req, res) {
     			const new_line = "<br/>";
     			const content = `您好，您申請的軟體編號 : ${software_id}，申請已被拒絕${new_line}理由：${rej_msg}`;
 				sendEmail.send(receivers, topic, content);
+
+				// update the rejection status of software to rejected
+	    	    await conn.query("update software set rejected = 1  where software_id = ?;", [software_id]);
 	    	}
 	       	catch(e) {
 		        console.error(e);
@@ -615,7 +616,7 @@ async function getContainerLog(container_name) {
 
             	pythonProcess.stderr.on('data', (data) => {
                     console.error(`stderr: ${data.toString()}`);
-                    //resolve([false, data.toString()]); // failed to create container, return the error msg
+                    resolve([true, data.toString()]); // failed to create container, return the error msg
             	});
 
             	pythonProcess.on('exit', (code) => {
@@ -631,12 +632,19 @@ async function getContainerLog(container_name) {
             	});
 
             	pythonProcess.stdout.on('data', (data) => {
-		    data = data.toString().replaceAll("'", '"'); 
-		    data = JSON.parse(data);
+					try {
+		    			data = data.toString().replaceAll("'", '"'); 
+		    			data = JSON.parse(data);
+					}
+					catch (e) {
+						data.error = data.toString();
+						console.log("aa" ,data);
+						console.log(e);
+					}
                     if (data.suc === "true") {
                        resolve([true, data.result]); // create container successfully, return the external port which the service is deployed on it
                     } 
-		    else {
+		    		else {
                         resolve([false, data.error]); // failed to create container, return the error msg
                     }
                 });

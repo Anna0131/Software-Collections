@@ -16,11 +16,12 @@ function checkSpecifySoftwareInfo(software_id) {
 async function applicationApproval(software_id) {
     const result = await axios.get(`${getUrlRootWithPort()}/api/software/agreement?software_id=${software_id}`);
     const suc_msg = "成功建立 Docker Container！";
-    if (result.data.includes(suc_msg)) {
-	alert(suc_msg);
+	console.log(result.data);
+    if (!result.data.msg && result.data.includes(suc_msg)) {
+		alert(suc_msg);
     }
     else {
-	alert("建立 Docker Container 失敗！" + result.data);
+		alert("建立 Docker Container 失敗！" + result.data.msg);
     }
     window.location.reload();
 }
@@ -40,9 +41,14 @@ async function setTabApplication() {
 	    "<td>" + lessTime(not_passed_application.softwares[i].create_time) + "</td>" +
 	    "<td>" + `<button onclick="checkSpecifySoftwareInfo(${not_passed_application.softwares[i].software_id})">詳細資訊</button` + "</td>" +
 	    "<td>" + `<button onclick="applicationApproval(${not_passed_application.softwares[i].software_id})">同意申請</button` + "</td>" +
+	    "<td>" + `<button onclick="applicationReject(${not_passed_application.softwares[i].software_id})">拒絕申請</button` + "</td>" +
 	    "</tr>";
          }
     }
+}
+
+async function applicationReject(software_id) {
+	window.location.href = `/api/software/disagreement?software_id=${software_id}`;
 }
 
 

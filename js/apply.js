@@ -31,30 +31,30 @@ async function postApplyInfo() {
     const name = document.getElementById("user_info").innerHTML;
     // post docker spec info if the checkbox of applying the container is clicked
     if (document.getElementById("container_info").style.display == "none") {
-	data = {topic, tags, description, name};
+		data = {topic, tags, description, name};
     }
     else {
         const docker_image = document.getElementById("docker_image").value;
         const internal_port = document.getElementById("internal_port").value;
-	const ram = document.getElementById("ram_usage").value;
-	const cpu = document.getElementById("cpu_usage").value;
-	const disk = document.getElementById("disk_usage").value;
+		const ram = document.getElementById("ram_usage").value;
+		const cpu = document.getElementById("cpu_usage").value;
+		const disk = document.getElementById("disk_usage").value;
         const domain = document.getElementById("domain").value;
         const env = document.getElementById("env").value;
         const volumes = document.getElementById("volumes").value;
         const set_public = document.getElementById("set_public").value;
         const ssl = document.getElementById("ssl").value;
-	data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, set_public, ssl};
+		data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, ssl, set_public};
     }
     // post data
     let result = await axios.post('/api/apply/info', data);
     result = result.data;
     if (result.suc == true) {
-	alert("申請已成功送出，若成功會再寄信告知");
-	window.location.href = "/main";
+		alert("申請已成功送出，若成功會再寄信告知");
+		window.location.href = "/main";
     }
     else {
-	alert("申請無法正確送出" + result.msg);
+		alert("申請無法正確送出" + result.msg);
     }
 }
 

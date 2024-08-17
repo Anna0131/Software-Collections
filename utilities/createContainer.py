@@ -68,11 +68,16 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
             return "false||failed to pull the image : " + image
         ##print("rc pi", rc_pull_image)
 
-    # select free external port
-    external_port = selectPort()
     # make docker run command
     container_name = str(uuid4())
-    cmd = "sudo docker run --network=software_collections --name %s -p %s:%s --memory=%s --cpus=%s" % (container_name, external_port, internal_port, ram, cpu)
+    external_port = "null"
+    if internal_port == "null" :
+        cmd = "sudo docker run --network=software_collections --name %s --memory=%s --cpus=%s" % (container_name, ram, cpu)
+    else :
+        # select free external port
+        external_port = selectPort()
+        cmd = "sudo docker run --network=software_collections --name %s -p %s:%s --memory=%s --cpus=%s" % (container_name, external_port, internal_port, ram, cpu)
+
     # add env variables if not empty
     if env.strip() :
         env = env.split("\n")

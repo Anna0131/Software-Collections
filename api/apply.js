@@ -140,7 +140,7 @@ router.post('/info', async function(req, res) {
 	    // docker spec
 	    const docker_image = req.body.docker_image;
 	    const domain = req.body.domain;
-	    const internal_port = req.body.internal_port;
+	    const internal_port = req.body.internal_port == '' ? null : req.body.internal_port;
 	    const ram = req.body.ram;
 	    const cpu = req.body.cpu;
 	    const disk = req.body.disk;
