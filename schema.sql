@@ -125,7 +125,7 @@ insert into ref(name, val, root_only) values("申請部屬軟體", "apply", FALS
 insert into ref(name, val, root_only) values("軟體開發需求", "requirement", FALSE);
 insert into ref(name, val, root_only) values("審核軟體申請", "audit", TRUE);
 insert into ref(name, val, root_only) values("系統設定", "settings", TRUE);
-insert into ref(name, val, root_only) values("系統教學", "tutorial", FALSE);
+insert into ref(name, val, root_only) values("系統文件", "tutorial", FALSE);
 
 /* Default user */
 insert into user(role_id, name, password, total_credit, s_num) values(3, "im_admin", "31004088-4938-48c2-9602-865e9f3a6781", 100, 1);
