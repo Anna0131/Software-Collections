@@ -1,1 +1,4 @@
 media/
+!media/public/
+!media/public/**
+!media/default.png

@@ -24,7 +24,7 @@ module.exports = {
         return new Promise((resolve, reject) => { // 包裝成 Promise
             const spawn = require("child_process").spawn;
             const pythonScript = path.join(__dirname, 'catch.py'); // path/to/catch.py
-            const pythonProcess = spawn('python', [pythonScript, account, password]);
+            const pythonProcess = spawn('python3', [pythonScript, account, password], {shell: true});
 
             //console.log(`account: ${account}`);
             //console.log(`password: ${password}`);
