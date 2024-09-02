@@ -12,6 +12,8 @@ var transporter = nodemailer.createTransport({
 });
 
 module.exports = {
+    admin_email : sender_account,
+
     send : function(receivers, subject, text) {  
         // send email to all recevier
         for (let i = 0;i < receivers.length;i++) {

@@ -50,7 +50,7 @@ def selectPort() :
     return 0
 
 def main(internal_port, image, ram, cpu, disk, env, volumes) :
-    # check the image existed in local
+    # check the image existed in local at first
     try:
         from subprocess import DEVNULL # py3k
     except ImportError:
@@ -63,10 +63,11 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
     if rc_image_existed != 0 :
         cmd_pull_image = "sudo docker image pull %s" %(image)
         result = Popen(cmd_pull_image, shell=True, stdout=DEVNULL)
+        result.wait()
         rc_pull_image = result.returncode # get return code of execution
+        #print("rc pi", rc_pull_image, result, cmd_pull_image)
         if rc_pull_image != 0 :
             return "false||failed to pull the image : " + image
-        ##print("rc pi", rc_pull_image)
 
     # make docker run command
     container_name = str(uuid4())
@@ -79,12 +80,12 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
         cmd = "sudo docker run --network=software_collections --name %s -p %s:%s --memory=%s --cpus=%s" % (container_name, external_port, internal_port, ram, cpu)
 
     # add env variables if not empty
-    if env.strip() :
+    if env.strip() and env != "null" :
         env = env.split("\n")
         for e in env :
             cmd += " -e " + e
     # add volumes if not empty
-    if volumes.strip() :
+    if volumes.strip() and env != "null" :
         volumes = volumes.split("\n")
         for v in volumes :
             cmd += " -v :" + v

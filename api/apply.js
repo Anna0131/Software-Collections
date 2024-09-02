@@ -52,6 +52,11 @@ function mkContent(name, topic, tags, description, docker_image, domain, create_
     content += "敘述：" + description + new_line;
     // docker spec
     if (ram != undefined) {
+	// replace new line in env and volumes
+	env = env == null ? null : env.replaceAll("\n", new_line);
+	volumes = volumes == null ? null : volumes.replaceAll("\n", new_line);
+	
+	// make email context
 	content += new_line + "有申請放置 Container，規格如下：" + new_line;
     	// docker image
     	content += "Docker Image：" + docker_image + new_line;
@@ -67,9 +72,9 @@ function mkContent(name, topic, tags, description, docker_image, domain, create_
 	// disk
 	content += "Disk：" + disk + " GB" + new_line;
 	// env
-	content += "ENV Variables：" + new_line + env.replaceAll("\n", new_line) + new_line;
+	content += "ENV Variables：" + new_line + env + new_line;
 	// volumes
-	content += "Volumes：" + new_line + volumes.replaceAll("\n", new_line) + new_line;
+	content += "Volumes：" + new_line + volumes + new_line;
 	content += new_line;
     }
     // apply time
@@ -144,8 +149,8 @@ router.post('/info', async function(req, res) {
 	    const ram = req.body.ram;
 	    const cpu = req.body.cpu;
 	    const disk = req.body.disk;
-	    const env = req.body.env;
-	    const volumes = req.body.volumes;
+	    const env = req.body.env == '' ? null : req.body.env;
+	    const volumes = req.body.volumes == '' ? null : req.body.volumes;
 	    const set_public = onlyOneOrZero(req.body.set_public);
 	    const ssl = onlyOneOrZero(req.body.ssl);
 
@@ -192,12 +197,12 @@ router.post('/info', async function(req, res) {
         	receivers = ["s109213059@mail1.ncnu.edu.tw", "tommy50508@gmail.com"];
         	content = mkContent(name, topic, tags, description, docker_image, domain, datetime, software_id, internal_port, ram, cpu, disk, env, volumes);
         	sendEmail.send(receivers, topic, content);
+	    	res.json({suc : true});
 	    }
 	    catch(e) {
 		console.log(e);
 		res.json({msg : "send email failed"});
 	    }
-	    res.json({suc : true});
 	}
 	else {
 	    res.json({msg : "login failed"});

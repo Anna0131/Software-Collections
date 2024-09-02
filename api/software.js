@@ -4,11 +4,11 @@ const util = require("./../utilities/utilities.js");
 const sendEmail = require("./../utilities/sendEmail.js");
 const jwt = require('jsonwebtoken');
 
-function informApplicant(external_port, software_id, user_info, container_name) {
+function informApplicantAndAdmin(external_port, software_id, user_info, container_name) {
     // send the email to inform the agreement of project to the person who applied this project
     const new_line = "<br/>";
     const software_url = util.getUrlRoot(util.system_url) + ':' + external_port;
-    const receivers = [user_info.email];
+    const receivers = [user_info.email, sendEmail.admin_email];
     const topic = "軟體庫系統通知 - 申請成功通過";
     let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
     content += `容器名稱：${container_name}` + new_line;
@@ -34,8 +34,8 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
     ram += "g"; // unit of ram is gigabytes
-    // console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
-    const pythonProcess = spawn('python', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes]);
+    //console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
+    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, 'null', 'null'], {shell: true});
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -44,6 +44,10 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
 		// no such image error is fined, as the python script will pull it later
 		if (!data.includes("No such image")) {
                     resolve([false, data.toString()]); // failed to create container, return the error msg
+		}
+		else {
+		    // return the alert msg first to avoid gateway timeout
+                    resolve([false, "It will take some time to pull image, so you can goto https://sw-registry.im.ncnu.edu.tw/audit to check details."]);
 		}
             });
 
@@ -412,7 +416,7 @@ router.get('/agreement', async function(req, res) {
 	    	        }
 		    
 		        // send the email to inform the approval message to the applicant
-		        informApplicant(external_port, software_id, user_info[0], container_name);
+		        informApplicantAndAdmin(external_port, software_id, user_info[0], container_name);
 		    
 		        res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/audit';</script>");
 		    }
@@ -426,7 +430,7 @@ router.get('/agreement', async function(req, res) {
 		        user_info = await conn.query("select * from user where user_id = ?", user_id);
 
 		        // send the email to inform the approval to the applicant
-				const receivers = [user_info[0].email]; 
+				const receivers = [user_info[0].email, sendEmail.admin_email]; 
     			const topic = "軟體庫系統通知 - 申請成功通過";
     			const new_line = "<br/>";
     			const content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
@@ -447,6 +451,11 @@ router.get('/agreement', async function(req, res) {
 	    catch (e) {
 		console.log(e);
 		res.json({msg : "failed to create container : " + e});
+		// send email to inform the failure of creating container to admin
+    		const topic = `軟體庫系統通知 - 建立容器 id : ${software_id} 失敗`;
+    		const new_line = "<br/>";
+    		const content = `軟體編號 : ${software_id}，建立失敗 ${new_line} Error ${e}`;
+		sendEmail.send(sendEmail.admin_email, topic, content);
 	    }
 	}
 	else {
@@ -516,7 +525,7 @@ router.get('/disagreement', async function(req, res) {
 function deleteContainer(container_name) {
             const spawn = require("child_process").spawn;
     	    const pythonScript = util.getParentPath(__dirname) + "/utilities/deleteContainer.py"; 
-            const pythonProcess = spawn('python', [pythonScript, container_name]);
+            const pythonProcess = spawn('python3', [pythonScript, container_name], {shell: true});
 
             //console.log(`account: ${account}`);
             //console.log(`password: ${password}`);
@@ -610,7 +619,7 @@ async function getContainerLog(container_name) {
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "logs";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python', [pythonScript, container_name, info_type]);
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type], {shell: true});
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -738,7 +747,7 @@ async function getContainerResourceUsage(container_name) {
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "resource_usage";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python', [pythonScript, container_name, info_type]);
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type], {shell: true});
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 
