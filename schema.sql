@@ -65,7 +65,7 @@ create table bulletin (
     `comment_user_id` int(10) NOT NULL ,
     `content` varchar(600) NOT NULL ,
     `create_time` datetime NOT NULL,
-    PRIMARY KEY (`software_id`) USING BTREE
+    PRIMARY KEY (`software_id`, `content`, `create_time`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 create table docker_spec (
@@ -121,9 +121,9 @@ insert into role(name) values("admin");
 /* All the links that can be used by the user */
 insert into ref(name, val, root_only) values("主頁面", "main", FALSE);
 insert into ref(name, val, root_only) values("使用者資訊", "user", FALSE);
-insert into ref(name, val, root_only) values("申請部屬軟體", "apply", FALSE);
-insert into ref(name, val, root_only) values("軟體開發需求", "requirement", FALSE);
-insert into ref(name, val, root_only) values("審核軟體申請", "audit", TRUE);
+insert into ref(name, val, root_only) values("申請部屬", "apply", FALSE);
+insert into ref(name, val, root_only) values("開發需求", "requirement", FALSE);
+insert into ref(name, val, root_only) values("審核申請", "audit", TRUE);
 insert into ref(name, val, root_only) values("系統設定", "settings", TRUE);
 insert into ref(name, val, root_only) values("系統文件", "tutorial", FALSE);
 

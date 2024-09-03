@@ -18,6 +18,10 @@
 
 安裝與設定:
 
+## Usagw
+- `npm install pm2 -g`
+- `pm2 start npm --name "software_collections" -- start`
+
 ## 使用說明
 ### 學生使用者
 訪問系統 URL。

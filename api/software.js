@@ -33,10 +33,14 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
     const spawn = require("child_process").spawn;
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
-    ram += "g"; // unit of ram is gigabytes
-    //console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
+    ram += "m"; // unit of ram is gigabytes
     let is_pulling_image = false;
-    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, 'null', 'null'], {shell: true});
+    // as shell is used, so put the text in a set of quote having many lines is necessary
+    internal_port = internal_port == null ? "'null'" : internal_port;
+    env = env == 'null' || env == null ? 'null' : "'" + env + "'";
+    volumes = volumes == 'null' || volumes == null ? 'null' : "'" + volumes + "'";
+    console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
+    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes], {shell: true});
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -69,6 +73,7 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
             });
 
             pythonProcess.stdout.on('data', (data) => {
+		    console.log(data.toString())
 		if (index++ != 0) {
 		    try {
 		        const create_suc = data.toString().split("||")[0];
@@ -397,6 +402,7 @@ router.get('/agreement', async function(req, res) {
 	            // pull app image from docker hub, and create the container on the docker server
 		    const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes, res);
 		    pulling_image = container_create[container_create.length - 1];
+		    console.log(container_create);
 		    if (container_create[0] == false) {
 		        // failed to create container, return the error msg
 			if (!pulling_image) // not pulling image

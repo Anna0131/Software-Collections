@@ -69,7 +69,7 @@ module.exports = {
                     resolve(false);
                 }
             } catch (error) {
-                console.error(error);
+                console.log(error);
                 resolve(false);
                 //reject(false);
             }

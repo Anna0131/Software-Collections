@@ -16,8 +16,11 @@ function checkSpecifySoftwareInfo(software_id) {
 async function applicationApproval(software_id) {
     const result = await axios.get(`${getUrlRootWithPort()}/api/software/agreement?software_id=${software_id}`);
     const suc_msg = "成功建立 Docker Container！";
-	console.log(result.data);
-    if (!result.data.msg && result.data.includes(suc_msg)) {
+	console.log(result);
+    if (result.data.includes("It will take some time to pull image")) {
+	alert("It will take some time to pull image, so you can go to https://sw-registry.im.ncnu.edu.tw/audit to check detail.");
+    }
+    else if (!result.data.msg && result.data.includes(suc_msg)) {
 		alert(suc_msg);
     }
     else {

@@ -85,10 +85,10 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
         for e in env :
             cmd += " -e " + e
     # add volumes if not empty
-    if volumes.strip() and env != "null" :
+    if volumes.strip() and volumes != "null" :
         volumes = volumes.split("\n")
         for v in volumes :
-            cmd += " -v :" + v
+            cmd += " -v " + container_name + ":" + v
     # add image
     cmd += " -d " + image
     #print(cmd)
