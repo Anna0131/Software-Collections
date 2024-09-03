@@ -112,7 +112,7 @@ async function showSoftwareCollections() {
 	"<tr/><td/>"+ software_info.software_id +  
 	"<td>" + software_info.topic + "</td>" +
 	`<td><a target="_blank" href = "${user_info}">` + software_info.name + "</a></td>" +  
-	"<td>" + getHost() + "</td>" +
+	"<td>" + software_info.ip + "</td>" +
 	"<td>" + software_info.external_port + "</td>" +
 	"<td>" + software_info.domain + ".im.ncnu.edu.tw" + "</td>" +
 	"<td>" + lessTime(software_info.create_time) + "</td>" +

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const jwt_key = "goodjwtkey";
 const system_url = "https://sw-registry.im.ncnu.edu.tw";
+const system_ip = "163.22.17.200";
 const db = require("mariadb");
 // create pool
 const pool = db.createPool({
@@ -16,6 +17,7 @@ const pool = db.createPool({
 module.exports = {
     // shared variable
     system_url,
+    system_ip,
     jwt_key,
 
     // shared function

@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 function informApplicantAndAdmin(external_port, software_id, user_info, container_name) {
     // send the email to inform the agreement of project to the person who applied this project
     const new_line = "<br/>";
-    const software_url = util.getUrlRoot(util.system_url) + ':' + external_port;
+    const software_url = util.system_ip + ':' + external_port;
     const receivers = [user_info.email, sendEmail.admin_email];
     const topic = "軟體庫系統通知 - 申請成功通過";
     let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
@@ -29,25 +29,28 @@ async function ckUserPrivileges(user_id) {
 }
 
 // create container by pulling the image from docker hub
-function createContainer(docker_image, internal_port, ram, cpu, disk, env, volumes) {
+function createContainer(docker_image, internal_port, ram, cpu, disk, env, volumes, res) {
     const spawn = require("child_process").spawn;
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
     ram += "g"; // unit of ram is gigabytes
     //console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
+    let is_pulling_image = false;
     const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, 'null', 'null'], {shell: true});
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
             pythonProcess.stderr.on('data', (data) => {
-                console.error(`stderr: ${data.toString()}`);
 		// no such image error is fined, as the python script will pull it later
 		if (!data.includes("No such image")) {
-                    resolve([false, data.toString()]); // failed to create container, return the error msg
+                    console.error(`stderr: ${data.toString()}`);
+                    resolve([false, data.toString(), is_pulling_image]); // failed to create container, return the error msg
 		}
 		else {
+                    console.log(`stderr: ${data.toString()}`);
 		    // return the alert msg first to avoid gateway timeout
-                    resolve([false, "It will take some time to pull image, so you can goto https://sw-registry.im.ncnu.edu.tw/audit to check details."]);
+		    res.json("It will take some time to pull image, so you can goto https://sw-registry.im.ncnu.edu.tw/audit to check details.");
+    		    is_pulling_image = true; // set this to mark that system already response
 		}
             });
 
@@ -62,7 +65,7 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
             pythonProcess.on('error', (err) => {
                 console.error(err);
                 // reject(err); // 子進程啟動失敗
-                resolve([false, "failed to create container : " + error]); // failed to create container, return the error msg
+                resolve([false, "failed to create container : " + error, is_pulling_image]); // failed to create container, return the error msg
             });
 
             pythonProcess.stdout.on('data', (data) => {
@@ -72,10 +75,10 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
 		        const external_port = data.toString().split("||")[1].split('\n')[0];
 		        const container_name = data.toString().split("||")[2].split('\n')[0];
                         if (create_suc === "true") {
-                            resolve([true, external_port, container_name]); // create container successfully, return the external port which the service is deployed on it
+                            resolve([true, external_port, container_name, is_pulling_image]); // create container successfully, return the external port which the service is deployed on it
                         } 
 		        else {
-                            resolve([false, external_port]); // failed to create container, return the error msg
+                            resolve([false, external_port, is_pulling_image]); // failed to create container, return the error msg
                         }
 		    }
 		    catch(e) {
@@ -268,12 +271,14 @@ router.get('/specify', async function(req, res) {
 		// get the info of software
 		software_info = await conn.query("select s.success_upload, s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.s_num from software as s, user as u where u.user_id = s.owner_user_id and s.software_id = ?;", [software_id]); // return the necessary data which will be display on the page of main
 		software_info = software_info[0];
+		software_info.ip = util.system_ip;
 		// add the view nums
 		const cookie_name = `software_${software_id}_last_view_time`;
 		const software_last_view_time = req.cookies[cookie_name];
 		if (validNewView(software_last_view_time, res, software_id)) {
 		    conn.query("update software set view_nums = view_nums + 1 where software.software_id = ?", [software_id]);
 		}
+
 	    	res.json({suc : true, software_info});
 	    }
 	    catch(e) {
@@ -362,6 +367,7 @@ router.post('/bulletin', async function(req, res) {
 // finish the application of creating container when admin press the agree button in email
 router.get('/agreement', async function(req, res) {
     try {
+	let pulling_image = false;
 	const result = await util.authenToken(req.cookies.token);
 	if (result) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
@@ -389,9 +395,11 @@ router.get('/agreement', async function(req, res) {
 		// check whether the application includes deploying the container
 		if (!util.isEmptyStr(software_info[0].docker_image)) {
 	            // pull app image from docker hub, and create the container on the docker server
-		    const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes);
+		    const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes, res);
+		    pulling_image = container_create[container_create.length - 1];
 		    if (container_create[0] == false) {
 		        // failed to create container, return the error msg
+			if (!pulling_image) // not pulling image
 		        res.json({msg : "failed to create container : " + container_create[1]}); 
 		    }
 		    else {
@@ -418,6 +426,7 @@ router.get('/agreement', async function(req, res) {
 		        // send the email to inform the approval message to the applicant
 		        informApplicantAndAdmin(external_port, software_id, user_info[0], container_name);
 		    
+			if (!pulling_image) // not pulling image
 		        res.send("<script>alert('成功建立 Docker Container！');window.location.href = '/audit';</script>");
 		    }
 		}
@@ -450,7 +459,8 @@ router.get('/agreement', async function(req, res) {
 	    }
 	    catch (e) {
 		console.log(e);
-		res.json({msg : "failed to create container : " + e});
+		if (!pulling_image) // not pulling image
+		    res.json({msg : "failed to create container : " + e});
 		// send email to inform the failure of creating container to admin
     		const topic = `軟體庫系統通知 - 建立容器 id : ${software_id} 失敗`;
     		const new_line = "<br/>";
