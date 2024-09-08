@@ -33,10 +33,8 @@ async function showSpecifyUserInfo() {
 	    "<td>" + data.s_num + "</td>" +
 	    "<td>" + data.name + "</td>" +
 	    "<td>" + `<a href="mailto:${data.email}">${data.email}</a>` + "</td>" +
-	    "<td>" + data.total_credit + "</td>" +
 	    "</tr>";
 	// if users query the data of themselves, then display the table which users can setting the info
-	console.log(data);
 	if (data.is_self) {
 	    showSettingTab();
 	}

@@ -24,6 +24,7 @@ create table requirement (
     `topic` varchar(300) NOT NULL ,
     `description` varchar(600) NOT NULL ,
     `awarded_credit` int(10) DEFAULT 0 ,
+    `status` tinyint(1) DEFAULT 0 ,
     `time` datetime NOT NULL,
     PRIMARY KEY (`req_id`) USING BTREE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

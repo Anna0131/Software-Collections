@@ -14,6 +14,19 @@ function getUrlRootWithPort() {
     return document.URL.split("/")[0] + "//" + document.URL.split("/")[2];
 }
 
+function convertStatusToStr(status) {
+    // convert int status to str
+    if (status == 0) {
+        return "未開發";
+    }
+    else if (status == 1) {
+        return "開發中";
+    }
+    else {
+        return "開發完成";
+    }
+}
+
 // show all requirements
 async function showRequirements() {
     const data = await getRequirements();
@@ -32,8 +45,8 @@ async function showRequirements() {
 	    "<td>" + result[i].topic + "</td>" +
 	    "<td>" + result[i].description + "</td>" +
 	    `<td><a target="_blank" href = "${user_info}">` + result[i].name + "</a></td>" +
-	    "<td>" + result[i].awarded_credit + "</td>" +
-		"<td>" + lessTime(result[i].time) + "</td>" +
+	    "<td>" + lessTime(result[i].time) + "</td>" +
+	    "<td>" + convertStatusToStr(result[i].status) + "</td>" +
 	    "</tr>";
 	}
     }
@@ -41,6 +54,30 @@ async function showRequirements() {
 	// failed to get the data of softwares
 	alert("failed to get the data of softwares");
     }
+}
+
+async function updateRequirementStatus(req_id, origin_status) {
+    if (confirm("確定要更改狀態？")) {
+	const new_status = document.getElementById(`sel_${req_id}`).value;
+	const result = await axios.put('/api/requirement/status', {new_status, req_id}); 
+    }
+    else {
+	document.getElementById(`sel_${req_id}`).value = origin_status;
+    }
+}
+
+function makeSelectOptionWithStatus(req_id, status) {
+    const all_status = [0, 1, 2]; // all types of status
+    all_status.splice(status, 1);
+    const rest_status = all_status;
+    // show this requirement current status, then the others
+    const element = 
+	`<select id=sel_${req_id} onchange='updateRequirementStatus(${req_id}, ${status})'>
+	<option value='${status}'>${convertStatusToStr(status)}</option>
+	<option value='${rest_status[0]}'>${convertStatusToStr(rest_status[0])}</option>
+	<option value='${rest_status[1]}'>${convertStatusToStr(rest_status[1])}</option>
+	</select>`
+    return element;
 }
 
 // show self requirements
@@ -64,9 +101,9 @@ async function showSelfRequirements() {
 	    	"<td>" + result[i].topic + "</td>" +
 	    	"<td>" + result[i].description + "</td>" +
 	    	`<td><a target="_blank" href = "${user_info}">` + result[i].name + "</a></td>" +
-	    	"<td>" + result[i].awarded_credit + "</td>" +
 			"<td>" + lessTime(result[i].time) + "</td>" +
 			"<td>" + `<button onclick='deleteRequirement(${result[i].req_id})'>刪除</button>` + "</td>" +
+			"<td>" + makeSelectOptionWithStatus(result[i].req_id, result[i].status) + "</td>" +
 	    	"</tr>";
 		}
     }

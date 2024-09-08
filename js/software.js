@@ -97,6 +97,9 @@ async function sleep(ms) {
     });
 }
 
+function filterDomain(domain) {
+    return domain[0] == '.' ? '' : domain;
+}
 
 async function showSoftwareCollections() {
     // show the all of softwares that are passed the verification by supervisors on the table
@@ -114,7 +117,7 @@ async function showSoftwareCollections() {
 	`<td><a target="_blank" href = "${user_info}">` + software_info.name + "</a></td>" +  
 	"<td>" + software_info.ip + "</td>" +
 	"<td>" + software_info.external_port + "</td>" +
-	"<td>" + software_info.domain + ".im.ncnu.edu.tw" + "</td>" +
+	"<td>" + filterDomain(software_info.domain + ".im.ncnu.edu.tw") + "</td>" +
 	"<td>" + lessTime(software_info.create_time) + "</td>" +
 	"<td>" + software_info.view_nums + "</td>" +
 	"</tr>";
