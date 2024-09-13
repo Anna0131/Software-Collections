@@ -1,0 +1,20 @@
+version: "3.9"
+
+networks:
+  software_collections:
+    external: true
+
+services:
+  ${service_name}:
+    image:
+    ports:
+    environment:
+    volumes:
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus:
+          memory:
+    networks:
+      - software_collections

@@ -29,7 +29,7 @@ async function ckUserPrivileges(user_id) {
 }
 
 // create container by pulling the image from docker hub
-function createContainer(docker_image, internal_port, ram, cpu, disk, env, volumes, res) {
+function createContainer(docker_image, internal_port, ram, cpu, disk, env, volumes, res, user_id) {
     const spawn = require("child_process").spawn;
     const pythonScript = util.getParentPath(__dirname) + "/utilities/createContainer.py"; 
     let index = 0;
@@ -39,8 +39,7 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
     internal_port = internal_port == null ? "'null'" : internal_port;
     env = env == 'null' || env == null ? 'null' : "'" + env + "'";
     volumes = volumes == 'null' || volumes == null ? 'null' : "'" + volumes + "'";
-    console.log(pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes);
-    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes, user_id], {shell: true});
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -53,7 +52,7 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
 		else {
                     console.log(`stderr: ${data.toString()}`);
 		    // return the alert msg first to avoid gateway timeout
-		    res.json("It will take some time to pull image, so you can goto https://sw-registry.im.ncnu.edu.tw/audit to check details.");
+		    res.json({msg : "It will take some time to pull image, so you can goto https://sw-registry.im.ncnu.edu.tw/audit to check details."});
     		    is_pulling_image = true; // set this to mark that system already response
 		}
             });
@@ -73,7 +72,6 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
             });
 
             pythonProcess.stdout.on('data', (data) => {
-		    console.log(data.toString())
 		if (index++ != 0) {
 		    try {
 		        const create_suc = data.toString().split("||")[0];
@@ -387,7 +385,7 @@ router.get('/agreement', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-		software_info = await conn.query("select docker_image, internal_port, memory, cpu, storage, env, volumes from software where software_id = ?", software_id);
+		software_info = await conn.query("select owner_user_id, docker_image, internal_port, memory, cpu, storage, env, volumes from software where software_id = ?", software_id);
 	    }
 	    catch(e) {
 		console.error(e);
@@ -400,9 +398,8 @@ router.get('/agreement', async function(req, res) {
 		// check whether the application includes deploying the container
 		if (!util.isEmptyStr(software_info[0].docker_image)) {
 	            // pull app image from docker hub, and create the container on the docker server
-		    const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes, res);
+		    const container_create = await createContainer(software_info[0].docker_image, software_info[0].internal_port, software_info[0].memory, software_info[0].cpu, software_info[0].storage, software_info[0].env, software_info[0].volumes, res, software_info[0].owner_user_id);
 		    pulling_image = container_create[container_create.length - 1];
-		    console.log(container_create);
 		    if (container_create[0] == false) {
 		        // failed to create container, return the error msg
 			if (!pulling_image) // not pulling image
@@ -538,10 +535,10 @@ router.get('/disagreement', async function(req, res) {
     }
 });
 
-function deleteContainer(container_name) {
+function deleteContainer(container_name, user_id) {
             const spawn = require("child_process").spawn;
     	    const pythonScript = util.getParentPath(__dirname) + "/utilities/deleteContainer.py"; 
-            const pythonProcess = spawn('python3', [pythonScript, container_name], {shell: true});
+            const pythonProcess = spawn('python3', [pythonScript, container_name, user_id], {shell: true});
 
             //console.log(`account: ${account}`);
             //console.log(`password: ${password}`);
@@ -615,7 +612,7 @@ router.delete('/', async function(req, res) {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	    // delete container from docker server
-	    deleteContainer(container_name);
+	    deleteContainer(container_name, user_id);
 	}
 	else {
             res.json({msg : "login failed"});
@@ -630,12 +627,12 @@ router.delete('/', async function(req, res) {
 // get the detailed info of specify container
 
 // get the logs of the container with py script
-async function getContainerLog(container_name) {
+async function getContainerLog(container_name, user_id) {
     // call python script
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "logs";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id], {shell: true});
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -663,7 +660,6 @@ async function getContainerLog(container_name) {
 					}
 					catch (e) {
 						data.error = data.toString();
-						console.log("aa" ,data);
 						console.log(e);
 					}
                     if (data.suc === "true") {
@@ -735,7 +731,7 @@ router.get('/info/logs', async function(req, res) {
 		return res.json({suc : false, msg : "container can not be null"});
 	    }
 	    if (owner_user_id == user_id) {
-	        const result = await getContainerLog(container_name);
+	        const result = await getContainerLog(container_name, user_id);
 	        if (result[0] && result[1] != "false") {
 		    res.json({suc : true, result : result[1]});
 	        }
@@ -758,12 +754,12 @@ router.get('/info/logs', async function(req, res) {
 });
 
 // get the resource usage of the container with py script
-async function getContainerResourceUsage(container_name) {
+async function getContainerResourceUsage(container_name, user_id) {
     // call python script
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "resource_usage";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id], {shell: true});
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -840,7 +836,7 @@ router.get('/info/resourceUsage', async function(req, res) {
 	    	if (owner_user_id != user_id) {
 		    return res.json({suc : false, msg : "invalid credentials"});
 		}
-	        const result = await getContainerResourceUsage(container_name);
+	        const result = await getContainerResourceUsage(container_name, user_id);
 	        if (result[0]) {
 		    // return the usage of ram, cpu, disk
 		    const resources = seperateResources(result[1]);

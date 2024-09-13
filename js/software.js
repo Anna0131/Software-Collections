@@ -61,7 +61,7 @@ async function setContainerLogs(external_port, software_id) {
     	document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
     }
     else {
-	console.log(container_logs.msg);
+	console.log(container_logs);
     }
 }
 

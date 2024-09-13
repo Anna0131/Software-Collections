@@ -2,7 +2,7 @@
 this script is used for running the specify docker container
 """
 from subprocess import call, PIPE, run, Popen
-import ast, argparse, time, socket, sys
+import ast, argparse, time, socket, sys, os
 from uuid import uuid4
 
 #internal_port = 80
@@ -19,7 +19,7 @@ cpu = sys.argv[4] # cpu usage
 disk = sys.argv[5] # disk usage
 env = sys.argv[6] # env variables
 volumes = sys.argv[7] # volumes
-
+user_id = sys.argv[8] # volumes
 #image = args["image"]
 #if args["port"] :
     #internal_port = ast.literal_eval((args["port"]))
@@ -49,13 +49,107 @@ def selectPort() :
             return i
     return 0
 
-def main(internal_port, image, ram, cpu, disk, env, volumes) :
+def readFile(file) :
+    f = open(file, 'r')
+    data = f.read()
+    f.close()
+    return data.split('\n')
+
+def writeFile(file, data) :
+    f = open(file, "w")
+    for d in data :
+        f.write(d)
+    f.close()
+
+def createContainerNetwork(DEVNULL) :
+    network = "software_collections"
+    cmd = "sudo docker network inspect %s" % (network)
+    result = Popen(cmd, shell=True, stdout=DEVNULL)
+    streamdata = result.communicate()[0]
+    existed = result.returncode # get return code of execution
+    
+    if existed != 0 :
+        # create a overlay network when the network not existed
+        cmd = "sudo docker network create %s -d overlay" % (network)
+        result = Popen(cmd, shell=True, stdout=DEVNULL)
+        streamdata = result.communicate()[0]
+        res = result.returncode # get return code of execution
+        if res == 0 :
+            return True
+        else :
+            return False
+    else :
+        # network existed
+        return True
+
+def makeComposeFile(container_name, ram, cpu, image, env, volumes, internal_port, user_id) :
+    compose_path = os.path.dirname(os.path.abspath(__file__)) + "/docker-compose.yml"
+    default_compose = readFile(compose_path)
+    new_compose = []
+    create_volumes = False
+    external_port = None
+    for line in default_compose :
+        if "image:" in line :
+            new_compose.append(line + (" %s" % (image)) + "\n")
+        elif "service_name" in line :
+            new_compose.append("  %s:\n" % (container_name))
+        elif "cpu" in line :
+            new_compose.append(line + (" '%s'" % (cpu)) + "\n")
+        elif "mem" in line :
+            new_compose.append(line + (" %s" % (ram)) + "\n")
+        elif "ports:" in line :
+            if internal_port != "null" :
+                new_compose.append(line + "\n")
+                external_port = selectPort()
+                new_compose.append("      - %s:%s \n" % (external_port, internal_port))
+        elif "environment:" in line :
+            if env != "null" : 
+                new_compose.append(line + "\n")
+                env = env.split("\n")
+                for e in env :
+                    new_compose.append("      - %s\n" % (e))
+        elif "volumes:" in line :
+            if volumes != "null" :
+                new_compose.append(line + "\n")
+                volumes = volumes.split("\n")
+                for v in volumes :
+                    new_compose.append("      - %s:%s\n" % (container_name, v))
+                create_volumes = True
+        else :
+            new_compose.append(line + "\n")
+    if create_volumes :
+        new_compose.append("volumes:\n")
+        new_compose.append("  %s:\n" % (container_name))
+    stack_name = "%s-%s" % (user_id, container_name)
+    new_compose_path = os.path.dirname(os.path.abspath(__file__)) + ("/%s-docker-compose.yml" % (stack_name))
+    writeFile(new_compose_path, new_compose)
+    return {'new_compose_path' : new_compose_path, 'external_port' : external_port, 'name' : stack_name, 'container_name' : container_name}
+
+def deployStack(stack_info) :
+    cmd = "sudo docker stack deploy --detach=true -c %s %s" % (stack_info['new_compose_path'], stack_info['name'])
+    result = Popen(cmd, shell=True)
+    streamdata = result.communicate()[0]
+    rc = result.returncode # get return code of execution
+    #print(result)
+    #print("return code :", rc)
+    if rc == 0 :
+        # return code = 0, meaning execute successfully
+        return "true||" + str(stack_info['external_port']) + "||" + stack_info['container_name'] # use || to split message
+    else :
+        # otherwise, meaning execute failed
+        return "false||" + str(result)
+
+def main(internal_port, image, ram, cpu, disk, env, volumes, user_id) :
     # check the image existed in local at first
     try:
         from subprocess import DEVNULL # py3k
     except ImportError:
-        import os
         DEVNULL = open(os.devnull, 'wb')
+
+    # make sure container network existed
+    if not createContainerNetwork(DEVNULL) :
+        return "false||failed to create container network"
+
     cmd_image_existed = "sudo docker inspect --type=image %s" % (image)
     result = Popen(cmd_image_existed, shell=True, stdout=DEVNULL)
     streamdata = result.communicate()[0]
@@ -70,7 +164,18 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
             return "false||failed to pull the image : " + image
 
     # make docker run command
-    container_name = str(uuid4())
+    container_name = str(uuid4())[:8]
+    stack_info = makeComposeFile(container_name, ram, cpu, image, env, volumes, internal_port, user_id)
+
+    # deploy stack with compose file
+    res = deployStack(stack_info)
+
+    # delete compose file
+    os.remove(stack_info['new_compose_path'])
+
+    return res
+
+    """
     external_port = "null"
     if internal_port == "null" :
         cmd = "sudo docker run --network=software_collections --name %s --memory=%s --cpus=%s" % (container_name, ram, cpu)
@@ -105,6 +210,7 @@ def main(internal_port, image, ram, cpu, disk, env, volumes) :
     else :
         # otherwise, meaning execute failed
         return "false||" + str(result)
+    """
 
 if __name__ == "__main__":
-    print(main(internal_port, image, ram, cpu, disk, env, volumes))
+    print(main(internal_port, image, ram, cpu, disk, env, volumes, user_id))

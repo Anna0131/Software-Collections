@@ -3,10 +3,11 @@ import sys, time
 
 container_name = sys.argv[1] # container name
 info_type = sys.argv[2] # type of container info
+user_id = sys.argv[3] # user_id
 
-def main(container_name, info_type) :
+def main(container_name, info_type, user_id) :
     if info_type == "logs" :
-        return {"suc" : "true", "result" : getContainerLogs(container_name)}
+        return {"suc" : "true", "result" : getContainerLogs(container_name, user_id)}
     elif info_type == "resource_usage" :
         return {"suc" : "true", "result" : getContainerResourceUsage(container_name)}
     else :
@@ -33,18 +34,28 @@ def getContainerResourceUsage(container_name) :
             # otherwise, meaning execute failed
             return "false"
 
+def rmSwarmMsg(msg) :
+    msg = msg.split("\n")
+    n_msg = ""
+    for m in msg :
+        m = m.split("|")
+        if len(m) > 1 :
+            n_msg += m[1] + "\n"
+    return n_msg
+
 # get the logs of the container with docker logs
-def getContainerLogs(container_name) :
-    cmd = "sudo docker logs %s" % (container_name)
+def getContainerLogs(container_name, user_id) :
+    service_name = "%s-%s_%s" % (user_id, container_name, container_name)
+    cmd = "sudo docker service logs %s" % (service_name)
     with Popen(cmd, stdout=PIPE, stderr=None, shell=True) as process:
         output = process.communicate()[0].decode("utf-8")
         rc = process.returncode # get return code of execution
         if rc == 0 :
             # return code = 0, meaning execute successfully
-            return output
+            return rmSwarmMsg(output)
         else :
             # otherwise, meaning execute failed
             return "false"
 
 if __name__ == "__main__":
-    print(main(container_name, info_type))
+    print(main(container_name, info_type, user_id))
