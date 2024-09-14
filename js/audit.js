@@ -16,15 +16,22 @@ function checkSpecifySoftwareInfo(software_id) {
 async function applicationApproval(software_id) {
     const result = await axios.get(`${getUrlRootWithPort()}/api/software/agreement?software_id=${software_id}`);
     const suc_msg = "成功建立 Docker Container！";
+    const suc_msg1 = "審核成功";
 	console.log(result);
     if (result.data.msg && result.data.msg.includes("It will take some time to pull image")) {
 	alert("It will take some time to pull image, so you can go to https://sw-registry.im.ncnu.edu.tw/audit to check detail.");
     }
-    else if (!result.data.msg && result.data.includes(suc_msg)) {
-		alert(suc_msg);
+    else if (result.data.suc == false) {
+	alert("建立 Docker Container 失敗！" + result.data.msg);
+    }	
+    else if (!result.data.msg && (result.data.includes(suc_msg) || result.data.includes(suc_msg1))) {
+	if (result.data.includes(suc_msg))
+	    alert(suc_msg);
+	else 
+	    alert(suc_msg1);
     }
     else {
-		alert("建立 Docker Container 失敗！" + result.data.msg);
+	alert("建立 Docker Container 失敗！" + result.data.msg);
     }
     window.location.reload();
 }

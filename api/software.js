@@ -409,7 +409,7 @@ router.get('/agreement', async function(req, res) {
 		        // create container successfully
 		        // return the external port which the service is deployed on it, and update to the data in db
 
-		        const external_port = container_create[1] == "null" ? null : container_create[1];
+		        const external_port = container_create[1] == "null" || container_create[1] == "None" ? null : container_create[1];
 		        const container_name = container_create[2];
 		        let user_info;
 	    	        try {
