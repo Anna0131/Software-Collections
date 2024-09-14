@@ -118,7 +118,7 @@ async function overApplicationLimit(user_id) {
 
 function onlyOneOrZero(val) {
     // return only one or zero to prevent invalid input store in db
-    if (val) {
+    if (val == true) {
 	return 1;
     }
     else {

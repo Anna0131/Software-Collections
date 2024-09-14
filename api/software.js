@@ -104,7 +104,7 @@ router.get('/', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-		softwares = await conn.query("select s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.user_id from software as s, user as u where s.success_upload = 1 and u.user_id = s.owner_user_id;"); // return the necessary data which will be display on the page of main
+		softwares = await conn.query("select s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, u.name, u.user_id from software as s, user as u where s.set_public=true and s.success_upload = 1 and u.user_id = s.owner_user_id;"); // return the necessary data which will be display on the page of main
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
@@ -171,7 +171,7 @@ router.get('/self', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 		//softwares = await conn.query("select * from software where success_upload = 1;");
-		softwares = await conn.query("select s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, s.success_upload from software as s where s.owner_user_id = ?;", [user_id]); // return the necessary data which will be display on the page of main
+		softwares = await conn.query("select s.set_public, s.view_nums, s.software_id, s.topic, s.description, s.domain, s.create_time, s.external_port, s.success_upload from software as s where s.owner_user_id = ?;", [user_id]); // return the necessary data which will be display on the page of main
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
@@ -875,6 +875,22 @@ async function updateSoftwareDesciption(software_id, content, user_id) {
     }
 }
 
+async function updateSoftwarePublic(software_id, set_public, user_id) {
+    let conn;
+    try {
+    	conn = await util.getDBConnection(); // get connection from db
+	await conn.query("update software set set_public = ? where software_id = ? and owner_user_id = ?;", [set_public, software_id, user_id]);
+    }
+    catch(e) {
+	console.error(e);
+	return {suc : "false", msg : "sql error"};
+    }
+    finally {
+	util.closeDBConnection(conn); // close db connection
+	return {suc : "true"};
+    }
+}
+
 // update description of software
 router.put("/description", async function(req, res) {
     try {
@@ -884,6 +900,27 @@ router.put("/description", async function(req, res) {
 	    const content = req.body.content;
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const result = await updateSoftwareDesciption(software_id, content, user_id);
+	    res.json(result);
+	}
+	else {
+            res.json({msg : "login failed"});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.json({msg : "error occured"});
+    }
+});
+
+// update set_public of software
+router.put("/public", async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const software_id = req.body.data.software_id;
+	    const set_public = req.body.data.set_public;
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const result = await updateSoftwarePublic(software_id, set_public, user_id);
 	    res.json(result);
 	}
 	else {
