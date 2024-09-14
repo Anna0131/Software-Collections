@@ -29,9 +29,10 @@ async function postApplyInfo() {
     const tags = document.getElementById("tags").value;
     const description = document.getElementById("description").value;
     const name = document.getElementById("user_info").innerHTML;
+    const set_public = document.getElementById("set_public").value;
     // post docker spec info if the checkbox of applying the container is clicked
     if (document.getElementById("container_info").style.display == "none") {
-		data = {topic, tags, description, name};
+		data = {topic, tags, description, name, set_public};
     }
     else {
         const docker_image = document.getElementById("docker_image").value;
@@ -42,7 +43,6 @@ async function postApplyInfo() {
         const domain = document.getElementById("domain").value;
         const env = document.getElementById("env").value;
         const volumes = document.getElementById("volumes").value;
-        const set_public = document.getElementById("set_public").value;
         const ssl = document.getElementById("ssl").value;
 		data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, ssl, set_public};
     }

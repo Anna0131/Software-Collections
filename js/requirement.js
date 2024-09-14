@@ -60,6 +60,7 @@ async function updateRequirementStatus(req_id, origin_status) {
     if (confirm("確定要更改狀態？")) {
 	const new_status = document.getElementById(`sel_${req_id}`).value;
 	const result = await axios.put('/api/requirement/status', {new_status, req_id}); 
+	location.reload();
     }
     else {
 	document.getElementById(`sel_${req_id}`).value = origin_status;
@@ -129,11 +130,10 @@ async function deleteRequirement(req_id) {
 async function postApplyInfo() {
     const topic = document.getElementById("topic").value;
     const description = document.getElementById("description").value;
-    const awarded_credit = document.getElementById("awarded_credit").value;
+    const awarded_credit = document.getElementById("awarded_credit").value == false ? 0 : document.getElementById("awarded_credit").value; // deprecated
     data = {topic, description, awarded_credit};
     let result = await axios.post('/api/requirement', data);
     result = result.data;
-    console.log(result);
     if (result.suc == true) {
 		alert("申請已成功送出");
     }

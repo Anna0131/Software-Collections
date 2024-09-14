@@ -26,6 +26,13 @@
                 <label for="portfolio">作品集檔案：（非必填）</label><br>
                 <input type="file" id="portfolio" name="portfolio"><br><br>
 				-->
+		    	<label for="set_public">公開作品 ：（必填）</label>
+			<br/>
+		    	<select id="set_public">
+				<option value="1">公開</option>
+				<option value="0">不公開</option>
+		    	</select>
+			<br/><br/>
                 <br/>
 		<hr/>
 		<br/>
@@ -41,13 +48,6 @@
 			    最多可以填 <b><span id="mapping_port_nums"></span></b> 個，多個不同請以 <b>,</b> 隔開
 		    	</label><br>
                 <input type="text" id="internal_port" style="width:8%;text-align:center;" placeholder="80"><br><br>
-		    	<label for="set_public">開放 Public 存取：（非必填）</label>
-			<br/>
-		    	<select id="set_public">
-				<option value="1">開放</option>
-				<option value="0">不開放</option>
-		    	</select>
-			<br/><br/>
                     <label for="domain">Domain：（非必填）</label><br>
 		    <input type="text" id="domain" style="width:8%;text-align:center;" placeholder="soccer"><b>.im.ncnu.edu.tw</b><br><br>
                     <label for="ssl">https + Reverse Proxy ：（非必填）</label>
