@@ -32,6 +32,12 @@ async function getContainerLogs(software_id) {
     return result.data;
 }
 
+async function getContainerImage(software_id) {
+    //get the logs of this container
+    const result = await axios.get(`/api/software/info/image?software_id=${software_id}`);
+    return result.data;
+}
+
 async function getContainerResourceUsage(software_id) {
     //get the info of the resource usage by this container
     const result = await axios.get(`/api/software/info/resourceUsage?software_id=${software_id}`);
@@ -50,18 +56,29 @@ async function setContainerName(software_id) {
     	document.getElementById("container_name").innerHTML = container_name.result;
     }
     else {
-		console.log(container_name.msg);
+	console.log(container_name.msg);
     }
 }
 
-async function setContainerLogs(external_port, software_id) {
+async function setContainerLogs(software_id) {
     const container_logs = await getContainerLogs(software_id);
     if (container_logs.suc) {
-		document.getElementById("container_info").style.display = "block";
+	document.getElementById("container_info").style.display = "block";
     	document.getElementById("container_logs").innerHTML = container_logs.result.toString().replaceAll("\n", "<br/>");
     }
     else {
 	console.log(container_logs);
+    }
+}
+
+async function setContainerImage(software_id) {
+    const container_image = await getContainerImage(software_id);
+	console.log(container_image);
+    if (container_image.suc) {
+    	document.getElementById("container_image").innerHTML = container_image.result.toString().replaceAll("\n", "<br/>");
+    }
+    else {
+	console.log(container_image);
     }
 }
 
@@ -130,9 +147,10 @@ async function showSoftwareCollections() {
 	const s_num = document.getElementById("user_info").innerHTML.split(" ")[0];
 	if (s_num == software_info.s_num) {
 	    setEditSoftware();
-	    setContainerLogs(software_info.external_port, software_info.software_id);
-		setContainerName(software_id);
+	    setContainerLogs(software_info.software_id);
+	    setContainerName(software_id);
 	    setContainerResourceUsage(software_info.external_port, software_info.software_id);
+	    setContainerImage(software_info.software_id);
 	}
     }
     else {

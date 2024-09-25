@@ -625,6 +625,52 @@ router.delete('/', async function(req, res) {
 
 // get the detailed info of specify container
 
+// get the image of the container with py script
+async function getContainerImage(container_name, user_id) {
+    // call python script
+    const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
+    const info_type = "image";
+    const spawn = require("child_process").spawn;
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id], {shell: true});
+
+            return new Promise((resolve, reject) => { // 包裝成 Promise
+
+            	pythonProcess.stderr.on('data', (data) => {
+                    console.error(`stderr: ${data.toString()}`);
+                    resolve([true, data.toString()]); // failed to create container, return the error msg
+            	});
+
+            	pythonProcess.on('exit', (code) => {
+                    console.log(`child process exited with code ${code}`);
+                    if (code !== 0) {
+                        reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
+                    }
+            	});
+
+            	pythonProcess.on('error', (err) => {
+                    console.error(err);
+                    //reject(err); // 子進程啟動失敗
+            	});
+
+            	pythonProcess.stdout.on('data', (data) => {
+					try {
+		    			data = data.toString().replaceAll("'", '"'); 
+		    			data = JSON.parse(data);
+					}
+					catch (e) {
+						data.error = data.toString();
+						console.log(e);
+					}
+                    if (data.suc === "true") {
+                       resolve([true, data.result]); // create container successfully, return the external port which the service is deployed on it
+                    } 
+		    		else {
+                        resolve([false, data.error]); // failed to create container, return the error msg
+                    }
+                });
+	    });
+}
+
 // get the logs of the container with py script
 async function getContainerLog(container_name, user_id) {
     // call python script
@@ -731,6 +777,41 @@ router.get('/info/logs', async function(req, res) {
 	    }
 	    if (owner_user_id == user_id) {
 	        const result = await getContainerLog(container_name, user_id);
+	        if (result[0] && result[1] != "false") {
+		    res.json({suc : true, result : result[1]});
+	        }
+	        else {
+		    res.status(500).json({suc : false, msg : result[1]});
+	        }
+	    }
+	    else {
+		res.status(403).json({suc : false, msg : "invalid credentials"});
+	    }
+	}
+	else {
+            res.status(401).json({msg : "Unauthorized"});
+        }
+    }
+    catch(e) {
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
+    }
+});
+
+router.get('/info/image', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const software_id = req.query.software_id;
+	    // only show the docker log message on owner page
+	    const user_id = await util.getTokenUid(req.cookies.token);
+	    const container_name = await getContainerName(software_id);
+	    const owner_user_id = await containerOwner(container_name);
+	    if (container_name==null) {
+		return res.status(400).json({suc : false, msg : "container can not be null"});
+	    }
+	    if (owner_user_id == user_id) {
+	        const result = await getContainerImage(container_name, user_id);
 	        if (result[0] && result[1] != "false") {
 		    res.json({suc : true, result : result[1]});
 	        }

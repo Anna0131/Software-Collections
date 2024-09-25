@@ -10,6 +10,8 @@ def main(container_name, info_type, user_id) :
         return {"suc" : "true", "result" : getContainerLogs(container_name, user_id)}
     elif info_type == "resource_usage" :
         return {"suc" : "true", "result" : getContainerResourceUsage(container_name)}
+    elif info_type == "image" :
+        return {"suc" : "true", "result" : getContainerImage(container_name, user_id)}
     else :
         return {"suc" : "false", "error" : "undefined info type : " + info_type}
 
@@ -53,6 +55,31 @@ def getContainerLogs(container_name, user_id) :
         if rc == 0 :
             # return code = 0, meaning execute successfully
             return rmSwarmMsg(output)
+        else :
+            # otherwise, meaning execute failed
+            return "false"
+
+def extractImageFromDockerServicePs(output) :
+   output = output.split('\n')[1].split(' ')
+   # image is display on third filed
+   field_index = 0
+   for s in output :
+       if s != '' :
+          field_index += 1 
+       if field_index == 3 :
+           return s
+   return "false"
+
+# get the image name of the container with docker logs
+def getContainerImage(container_name, user_id) :
+    service_name = "%s-%s_%s" % (user_id, container_name, container_name)
+    cmd = "sudo docker service ps %s" % (service_name)
+    with Popen(cmd, stdout=PIPE, stderr=None, shell=True) as process:
+        output = process.communicate()[0].decode("utf-8")
+        rc = process.returncode # get return code of execution
+        if rc == 0 :
+            # return code = 0, meaning execute successfully
+            return extractImageFromDockerServicePs(output)
         else :
             # otherwise, meaning execute failed
             return "false"
