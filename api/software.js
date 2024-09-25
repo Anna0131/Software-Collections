@@ -12,7 +12,8 @@ function informApplicantAndAdmin(external_port, software_id, user_info, containe
     const topic = "軟體庫系統通知 - 申請成功通過";
     let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
     content += `容器名稱：${container_name}` + new_line;
-    content += `已成功部屬於：${software_url}`;
+    content += `已成功部屬於：${software_url}` + new_line;
+    content += `備註：若有申請 domain 或 ssl，會再另行通知是否完成。`;
     sendEmail.send(receivers, topic, content);
 }
 

@@ -2,3 +2,4 @@ media/
 !media/public/
 !media/public/**
 !media/default.png
+node_modules/
