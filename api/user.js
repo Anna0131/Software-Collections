@@ -22,20 +22,20 @@ router.get('/', async function(req, res) {
 		res.json({suc : true, s_num, name, user_id, email, total_credit});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -99,19 +99,19 @@ router.get('/specify', async function(req, res) {
 	    }
 	    catch(e) {
 		console.error(e);
-		res.json({suc : false});
+		res.status(500).json({suc : false});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -136,12 +136,12 @@ router.get('/headshot', async function(req, res) {
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -161,19 +161,24 @@ router.post('/headshot', async function(req, res) {
 		    suc = true;
 		}
 		catch (e) {
-		    console.log(e);
+		    console.error(e);
 		}
 		fs.unlinkSync(headshot_temp_path); // remove the temp file
 	    }
-	    res.json({suc});
+	    if (suc) {
+	        res.json({suc});
+	    }
+	    else {
+	        res.status(500).json({suc});
+	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -191,20 +196,20 @@ router.post('/email', async function(req, res) {
 		res.json({suc : true});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false, msg : "db error"});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

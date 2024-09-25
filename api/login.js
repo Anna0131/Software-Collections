@@ -136,7 +136,7 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
 	const is_blocked = await blockBruteForce(req.ip);
 	if (is_blocked) {
 	    suc = false;
-	    res.json({suc : suc, authen_result : "You are blocked as the violation of exceeding the failure login times"});
+	    res.status(403).json({suc : suc, authen_result : "You are blocked as the violation of exceeding the failure login times"});
 	}
 	else {
 
@@ -169,8 +169,8 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
 
     }
     catch (e) {
-        console.log(e);
-        res.json({suc: false}); // 確保出錯時回傳失敗的訊息
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }    
 });
 

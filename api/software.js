@@ -108,20 +108,20 @@ router.get('/', async function(req, res) {
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+	    res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -139,24 +139,24 @@ router.get('/not_passed', async function(req, res) {
 	    let conn;
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
-			softwares = await conn.query("select s.software_id, s.topic, s.description, s.create_time, u.name, u.user_id from software as s, user as u where s.success_upload = 0 and s.rejected = 0 and u.user_id = s.owner_user_id;"); // return the softwares which are not passed the approval and have not been rejected
+		softwares = await conn.query("select s.software_id, s.topic, s.description, s.create_time, u.name, u.user_id from software as s, user as u where s.success_upload = 0 and s.rejected = 0 and u.user_id = s.owner_user_id;"); // return the softwares which are not passed the approval and have not been rejected
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -175,20 +175,20 @@ router.get('/self', async function(req, res) {
 	    	res.json({suc : true, softwares});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -267,7 +267,7 @@ router.get('/specify', async function(req, res) {
 	    // only the owner and super user can check the unapproved container info
 	    const authen_result = await validCheckContainerInfo(user_id, software_id);
 	    if (!authen_result) {
-		return res.json({suc : false, msg : "not enough privileged to check the unapproved container info"});
+		return res.status(403).json({suc : false, msg : "not enough privileged to check the unapproved container info"});
 	    }
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
@@ -285,20 +285,20 @@ router.get('/specify', async function(req, res) {
 	    	res.json({suc : true, software_info});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -317,20 +317,20 @@ router.get('/bulletin', async function(req, res) {
 	    	res.json({suc : true, bulletin});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -350,20 +350,20 @@ router.post('/bulletin', async function(req, res) {
 	    	res.json({suc : true});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -376,8 +376,8 @@ router.get('/agreement', async function(req, res) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const authen_result = await ckUserPrivileges(user_id);
 	    if (!authen_result) {
-			// privilege of user is not enough to agree the upload of software
-			return res.json({msg : "your privilege is not enough to approve the upload of software"});
+		// privilege of user is not enough to agree the upload of software
+		return res.json({msg : "your privilege is not enough to approve the upload of software"});
 	    }
 	    // update the status of software to upload allowed, and do the other works to create service 
 	    const software_id = req.query.software_id;
@@ -388,8 +388,8 @@ router.get('/agreement', async function(req, res) {
 		software_info = await conn.query("select owner_user_id, docker_image, internal_port, memory, cpu, storage, env, volumes from software where software_id = ?", software_id);
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
@@ -403,7 +403,7 @@ router.get('/agreement', async function(req, res) {
 		    if (container_create[0] == false) {
 		        // failed to create container, return the error msg
 			if (!pulling_image) // not pulling image
-		        res.json({msg : "failed to create container : " + container_create[1]}); 
+		        res.status(500).json({msg : "failed to create container : " + container_create[1]}); 
 		    }
 		    else {
 		        // create container successfully
@@ -415,8 +415,8 @@ router.get('/agreement', async function(req, res) {
 	    	        try {
 	    		    conn = await util.getDBConnection(); // get connection from db
 	    		    await conn.query("update software set external_port = ?, container_name = ?, success_upload = 1  where software_id = ?;", [external_port, container_name, software_id]);
-			    	// get the info of user to send back the email
-			    	user_info = await conn.query("select * from user where user_id in (select owner_user_id from software where software_id = ?);", software_id);
+			    // get the info of user to send back the email
+			    user_info = await conn.query("select * from user where user_id in (select owner_user_id from software where software_id = ?);", software_id);
 	    	        }
 	       	        catch(e) {
 			    console.error(e);
@@ -442,18 +442,17 @@ router.get('/agreement', async function(req, res) {
 		        user_info = await conn.query("select * from user where user_id = ?", user_id);
 
 		        // send the email to inform the approval to the applicant
-				const receivers = [user_info[0].email, sendEmail.admin_email]; 
+			const receivers = [user_info[0].email, sendEmail.admin_email]; 
     			const topic = "軟體庫系統通知 - 申請成功通過";
     			const new_line = "<br/>";
     			const content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
-				sendEmail.send(receivers, topic, content);
-
-				// response
+			sendEmail.send(receivers, topic, content);
+			// response
 		        res.send("<script>alert('審核成功！');window.location.href = '/audit';</script>");
 	    	    }
 	       	    catch(e) {
-		        console.error(e);
-		        res.json({suc : false, msg : e});
+                        console.error(e);
+	                res.status(500).json({msg : "Internal Server Error"});
 	    	    }
 	    	    finally {
 		        util.closeDBConnection(conn); // close db connection
@@ -461,23 +460,23 @@ router.get('/agreement', async function(req, res) {
 		}
 	    }
 	    catch (e) {
-		console.log(e);
-		if (!pulling_image) // not pulling image
-		    res.json({msg : "failed to create container : " + e});
+		console.error(e);
 		// send email to inform the failure of creating container to admin
     		const topic = `軟體庫系統通知 - 建立容器 id : ${software_id} 失敗`;
     		const new_line = "<br/>";
     		const content = `軟體編號 : ${software_id}，建立失敗 ${new_line} Error ${e}`;
 		sendEmail.send(sendEmail.admin_email, topic, content);
+		if (!pulling_image) // not pulling image
+		    res.json({msg : "failed to create container : " + e});
 	    }
 	}
 	else {
-	    res.redirect("/login");
+	    res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-	res.redirect("/login");
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -489,49 +488,48 @@ router.get('/disagreement', async function(req, res) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const authen_result = await ckUserPrivileges(user_id);
 	    if (!authen_result) {
-			// privilege of user is not enough to agree the upload of software
-			return res.json({msg : "your privilege is not enough to approve the upload of software"});
+		// privilege of user is not enough to agree the upload of software
+		return res.status(403).json({msg : "your privilege is not enough to approve the upload of software"});
 	    }
 	    const software_id = req.query.software_id;
 		const rej_msg = req.query.msg;
 		if (rej_msg == undefined) {
-			// let manager to input the reason about why reject the application
-			res.send("<script>const msg = prompt('輸入為何拒絕申請');const searchParams = new URLSearchParams(window.location.search);searchParams.set('msg', msg);window.location.search = searchParams.toString();</script>");
+		    // let manager to input the reason about why reject the application
+		    res.send("<script>const msg = prompt('輸入為何拒絕申請');const searchParams = new URLSearchParams(window.location.search);searchParams.set('msg', msg);window.location.search = searchParams.toString();</script>");
 		}
 		else {
-			// inform the applicant that the application is rejected and the reason
-			res.redirect("/audit");
-	    	try {
-	    	    conn = await util.getDBConnection(); // get connection from db
+		    // inform the applicant that the application is rejected and the reason
+		    res.redirect("/audit");
+	    	    try {
+	    	        conn = await util.getDBConnection(); // get connection from db
 		        // get the info of user to send back the email
-			    user_info = await conn.query("select * from user where user_id in (select owner_user_id from software where software_id = ?);", software_id);
-
+			user_info = await conn.query("select * from user where user_id in (select owner_user_id from software where software_id = ?);", software_id);
 		        // send the email to inform the approval to the applicant
-				const receivers = [user_info[0].email]; 
+			const receivers = [user_info[0].email]; 
     			const topic = "軟體庫系統通知 - 申請失敗";
     			const new_line = "<br/>";
     			const content = `您好，您申請的軟體編號 : ${software_id}，申請已被拒絕${new_line}理由：${rej_msg}`;
-				sendEmail.send(receivers, topic, content);
+			sendEmail.send(receivers, topic, content);
 
-				// update the rejection status of software to rejected
-	    	    await conn.query("update software set rejected = 1  where software_id = ?;", [software_id]);
-	    	}
-	       	catch(e) {
-		        console.error(e);
-		        res.json({suc : false, msg : e});
-	    	}
-	    	finally {
+			// update the rejection status of software to rejected
+	    	        await conn.query("update software set rejected = 1  where software_id = ?;", [software_id]);
+	    	    }
+	       	    catch(e) {
+                        console.error(e);
+	                res.status(500).json({msg : "Internal Server Error"});
+	    	    }
+	    	    finally {
 		    	util.closeDBConnection(conn); // close db connection
-	    	}
+	    	    }
 		}
 	}
 	else {
-	    res.redirect("/login");
+	    res.status.json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-		res.redirect("/login");
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -601,12 +599,12 @@ router.delete('/', async function(req, res) {
 	    try {
 	    	conn = await util.getDBConnection(); // get connection from db
 	    	container_name = await getContainerName(software_id);
-			await conn.query("delete from software where software_id = ? and owner_user_id = ?", [software_id, user_id]);
+		await conn.query("delete from software where software_id = ? and owner_user_id = ?", [software_id, user_id]);
 	    	res.json({suc : true});
 	    }
 	    catch(e) {
-		console.error(e);
-		res.json({suc : false, msg : "sql error"});
+                console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
@@ -615,12 +613,12 @@ router.delete('/', async function(req, res) {
 	    deleteContainer(container_name, user_id);
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -702,19 +700,19 @@ router.get('/info/name', async function(req, res) {
 	    const container_name = await getContainerName(software_id);
 	    const owner_user_id = await containerOwner(container_name);
 	    if (container_name==null) {
-			return res.json({suc : false, msg : "container can not be null"});
+		return res.status(400).json({suc : false, msg : "container can not be null"});
 	    }
 	    if (owner_user_id == user_id) {
-		    res.json({suc : true, result : container_name});
-		}
+		res.json({suc : true, result : container_name});
+	    }
 	}
 	else {
-        res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
+        }
     }
-	}
     catch(e) {
-        console.log(e);
-        res.json({msg : "error occured"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -728,7 +726,7 @@ router.get('/info/logs', async function(req, res) {
 	    const container_name = await getContainerName(software_id);
 	    const owner_user_id = await containerOwner(container_name);
 	    if (container_name==null) {
-		return res.json({suc : false, msg : "container can not be null"});
+		return res.status(400).json({suc : false, msg : "container can not be null"});
 	    }
 	    if (owner_user_id == user_id) {
 	        const result = await getContainerLog(container_name, user_id);
@@ -736,20 +734,20 @@ router.get('/info/logs', async function(req, res) {
 		    res.json({suc : true, result : result[1]});
 	        }
 	        else {
-		    res.json({suc : false, msg : result[1]});
+		    res.status(500).json({suc : false, msg : result[1]});
 	        }
 	    }
 	    else {
-		res.json({suc : false, msg : "invalid credentials"});
+		res.status(403).json({suc : false, msg : "invalid credentials"});
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "error occured"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -828,13 +826,13 @@ router.get('/info/resourceUsage', async function(req, res) {
 	    const software_id = req.query.software_id;
 	    const container_name = await getContainerName(software_id);
 	    if (container_name==null) {
-		return res.json({suc : false, msg : "container can not be null"});
+		return res.status(400).json({suc : false, msg : "container can not be null"});
 	    }
 	    else {
 	        const user_id = await util.getTokenUid(req.cookies.token);
 	    	const owner_user_id = await containerOwner(container_name);
 	    	if (owner_user_id != user_id) {
-		    return res.json({suc : false, msg : "invalid credentials"});
+		    return res.status(403).json({suc : false, msg : "invalid credentials"});
 		}
 	        const result = await getContainerResourceUsage(container_name, user_id);
 	        if (result[0]) {
@@ -845,17 +843,17 @@ router.get('/info/resourceUsage', async function(req, res) {
 		    res.json({suc : true, result : resources});
 	        }
 	        else {
-		    res.json({suc : false, msg : result[1]});
+		    res.status(500).json({suc : false, msg : result[1]});
 	        }
 	    }
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "error occured"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -903,12 +901,12 @@ router.put("/description", async function(req, res) {
 	    res.json(result);
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "error occured"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -924,12 +922,12 @@ router.put("/public", async function(req, res) {
 	    res.json(result);
 	}
 	else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "error occured"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

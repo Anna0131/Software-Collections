@@ -26,12 +26,12 @@ router.get('/', async function(req, res) {
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+	    res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -67,12 +67,12 @@ router.post('/', async function(req, res) {
 	    	}
     	}
         else {
-            res.json({msg : "login failed"});
+	    res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -98,12 +98,12 @@ router.delete('/', async function(req, res) {
 	    	}
     	}
         else {
-            res.json({msg : "login failed"});
+	    res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 
@@ -130,12 +130,12 @@ router.put('/status', async function(req, res) {
 	    	}
     	}
         else {
-            res.json({msg : "login failed"});
+	    res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

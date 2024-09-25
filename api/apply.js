@@ -205,12 +205,12 @@ router.post('/info', async function(req, res) {
 	    }
 	}
 	else {
-	    res.json({msg : "login failed"});
+	    res.status(401).json({msg : "Unauthorized"});
 	}
     }
     catch(e) {
-        console.log(e);
-	res.json({msg : "error occured"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

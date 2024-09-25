@@ -42,20 +42,20 @@ router.post('/', async function(req, res) {
 	    }
 	    catch(e) {
 		console.error(e);
+	        res.status(500).json({msg : "Internal Server Error"});
 		await conn.rollback(); // rollback transaction
-		res.json({suc : false});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "login failed"});
         }
     }
     catch(e) {
-        console.log(e);
-	res.json({suc : false});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

@@ -16,19 +16,19 @@ router.get('/', async function(req, res) {
 	    }
 	    catch(e) {
 		console.error(e);
-		res.json({suc : false});
+	        res.status(500).json({msg : "Internal Server Error"});
 	    }
 	    finally {
 		util.closeDBConnection(conn); // close db connection
 	    }
         }
         else {
-            res.json({msg : "login failed"});
+            res.status(401).json({msg : "Unauthorized"});
         }
     }
     catch(e) {
-        console.log(e);
-        res.json({msg : "login failed"});
+        console.error(e);
+	res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

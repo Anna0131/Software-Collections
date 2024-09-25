@@ -13,8 +13,8 @@ router.get('/', async function(req, res) {
         }
     }
     catch(e) {
-        console.log(e);
-	res.redirect("/login");
+        console.error(e);
+	res.status(500).sned("Internal Server Error");
     }
     return;
 });
