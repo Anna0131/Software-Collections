@@ -152,11 +152,16 @@ router.post('/headshot', async function(req, res) {
 	if (result) {
 	    const user_id = await util.getTokenUid(req.cookies.token);
 	    const headshot = req.files.image;
+	    console.log(headshot);
 	    let suc = false; // whether have set the image of headshot successfully
 	    if (headshot != undefined) {
 	        const headshot_temp_path = headshot.tempFilePath; // path of temp file uploaded by user
 		const headshot_path = util.getParentPath(__dirname) + `/media/user_id_${user_id}/headshot.png`; // the path which actually store img of headshot
 		try {
+	            // create directory if not existed
+		    if (!fs.existsSync(util.getParentPath(__dirname) + `/media/user_id_${user_id}`)){
+                        fs.mkdirSync(util.getParentPath(__dirname) + `/media/user_id_${user_id}`);
+                    }
 		    fs.copyFileSync(headshot_temp_path, headshot_path);
 		    suc = true;
 		}
