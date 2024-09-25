@@ -16,5 +16,8 @@ services:
         limits:
           cpus:
           memory:
+      placement:
+        constraints:
+          - node.hostname == im200 
     networks:
       - software_collections
