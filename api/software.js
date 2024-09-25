@@ -13,7 +13,8 @@ function informApplicantAndAdmin(external_port, software_id, user_info, containe
     let content = `您好，您申請的軟體編號 : ${software_id}，已成功通過申請` + new_line;
     content += `容器名稱：${container_name}` + new_line;
     content += `已成功部屬於：${software_url}` + new_line;
-    content += `備註：若有申請 domain 或 ssl，會再另行通知是否完成。`;
+    content += `備註 1：若有申請 Domain 或 SSL，管理員會再另行通知是否完成。` + new_line;
+    content += `備註 2：若有需要更新 Container Image，請再寄信告知管理員。` + new_line;
     sendEmail.send(receivers, topic, content);
 }
 
