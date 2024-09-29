@@ -200,27 +200,37 @@ async function showBulletin() {
 async function postComment() {
     const content = document.getElementById("comment").value;
     data = {content, software_id};
-    let result = await axios.post('/api/software/bulletin', data);
-    result = result.data;
-    if (result.suc == true) {
-	alert("新增留言成功");
-    }
-    else {
-	alert("新增留言失敗，" + result.msg);
-    }
+	try {
+    	let result = await axios.post('/api/software/bulletin', data);
+    	result = result.data;
+    	if (result.suc == true) {
+			alert("新增留言成功");
+    	}
+    	else {
+			alert("新增留言失敗，" + result.msg);
+    	}
+	}
+	catch(e) {
+		alert("新增留言失敗，" + e.response.data.msg);
+	}	
 }
 
 async function updateDescription() {
     const content = document.getElementById("description").value;
     const data = {software_id, content};
-    const result = await axios.put("/api/software/description", data);
-    if (result.data.suc) {
-        alert("更新成功！");
-    }
-    else {
-	alert("更新失敗！");
-    }
-    window.location.reload();
+	try {
+    	const result = await axios.put("/api/software/description", data);
+    	if (result.data.suc) {
+        	alert("更新成功！");
+    	}
+    	else {
+			alert("更新失敗！");
+    	}
+    	window.location.reload();
+	}
+	catch(e) {
+		alert("更新失敗" + e.response.data.msg);
+	}
 }
 
 setUserInfo();

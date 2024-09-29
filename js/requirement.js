@@ -58,12 +58,17 @@ async function showRequirements() {
 
 async function updateRequirementStatus(req_id, origin_status) {
     if (confirm("確定要更改狀態？")) {
-	const new_status = document.getElementById(`sel_${req_id}`).value;
-	const result = await axios.put('/api/requirement/status', {new_status, req_id}); 
-	location.reload();
+		const new_status = document.getElementById(`sel_${req_id}`).value;
+		try {
+			const result = await axios.put('/api/requirement/status', {new_status, req_id}); 
+			location.reload();
+		}
+		catch(e) {
+			alert("更改失敗" + e.response.data.msg);
+		}	
     }
     else {
-	document.getElementById(`sel_${req_id}`).value = origin_status;
+		document.getElementById(`sel_${req_id}`).value = origin_status;
     }
 }
 
@@ -117,14 +122,19 @@ async function showSelfRequirements() {
 async function deleteRequirement(req_id) {
 	const api = "/api/requirement";
 	const data = {req_id};
-	const result = await axios.delete(api, {data : data});
-    if (result.data.suc == true) {
-		alert("刪除成功");
-    }
-    else {
-		alert("刪除失敗" + result.data.msg);
-    }
-	window.location.reload();
+    try {
+		const result = await axios.delete(api, {data : data});
+    	if (result.data.suc == true) {
+			alert("刪除成功");
+    	}
+    	else {
+			alert("刪除失敗" + result.data.msg);
+    	}
+		window.location.reload();
+	}
+	catch(e) {
+		alert("刪除失敗" + e.response.data.msg);
+	}	
 }
 
 async function postApplyInfo() {

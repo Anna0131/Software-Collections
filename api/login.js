@@ -16,10 +16,10 @@ async function insertUser(account, name) {
 			let total_credit;
 			let email = null;
 			if (account.length == 5) {
-			// account of teacher or other school employee
-			total_credit = 10000;
+				// account of teacher or other school employee
+				total_credit = 10000;
 				role_id = await conn.query("select role_id from role where name = ?;", "teacher");
-			role_id = role_id[0].role_id;
+				role_id = role_id[0].role_id;
 			}
 			else {
 				// account of student
@@ -132,45 +132,42 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
         const account = req.body.account;
         const password = req.body.password;
 
-	// check if this ip exceed the limitation of login failure in a period of time
-	const is_blocked = await blockBruteForce(req.ip);
-	if (is_blocked) {
-	    suc = false;
-	    res.status(403).json({suc : suc, authen_result : "You are blocked as the violation of exceeding the failure login times"});
-	}
-	else {
-
-            let authen_result = await util.loginAuthentication(account, password);
-            if (authen_result != "login failed") {
-	        // login successfully
-	        const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
-                data = {uid : user_id};
-                const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
-                res.cookie("token", token);
-            }
-            else {
-	        // if this account can not login on moodle, then check if this account is additionally added by root
-	        const user_id = await checkAddingUser(account, password);
-	        if (user_id) {
-	            // login successfully
-	            authen_result = user_id;
+		// check if this ip exceed the limitation of login failure in a period of time
+		const is_blocked = await blockBruteForce(req.ip);
+		if (is_blocked) {
+	    	suc = false;
+	    	res.status(403).json({suc : suc, authen_result : "超過一段時間內限制的失敗次數"});
+		}
+		else {
+        	let authen_result = await util.loginAuthentication(account, password);
+        	if (authen_result != "login failed") {
+	        	// login successfully
+	        	const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
+            	data = {uid : user_id};
+            	const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
+            	res.cookie("token", token);
+        	}
+        	else {
+	        	// if this account can not login on moodle, then check if this account is additionally added by root
+	        	const user_id = await checkAddingUser(account, password);
+	        	if (user_id) {
+	            	// login successfully
+	            	authen_result = user_id;
                     data = {uid : user_id};
                 	const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
                     res.cookie("token", token);
-	        }
-	        else {
-	            suc = false;
-	        }
-            }
+	        	}
+	        	else {
+	            	suc = false;
+	        	}	
+        	}
             res.json({suc : suc, authen_result : authen_result});
-
-	    insertLoginRecord(suc, account, req.ip);
-	}
-
+	    	insertLoginRecord(suc, account, req.ip);
+		}
     }
     catch (e) {
         console.error(e);
-	res.status(500).json({msg : "Internal Server Error"});
+		res.status(500).json({msg : "Internal Server Error"});
     }    
 });
 

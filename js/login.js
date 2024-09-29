@@ -13,13 +13,19 @@ async function submit() {
     const account = document.getElementById("account").value;
     const password = document.getElementById("password").value;
     data = {account : account, password : password};
-    let suc_login = await axios.post('/api/login', data);
-	showOrHideLoading();
-    suc_login = suc_login.data;
-    if (suc_login.suc) {
-        location.href = '/main';
+    try {
+        let suc_login = await axios.post('/api/login', data);
+        showOrHideLoading();
+        suc_login = suc_login.data;
+        console.log(suc_login);
+        if (suc_login.suc) {
+            location.href = '/main';
+        }
+        else {
+	    	alert(suc_login.authen_result);
+        }
     }
-    else {
-	alert(suc_login.authen_result);
+    catch(e) {
+       	alert("login failed " + e.response.data.authen_result);
     }
 }

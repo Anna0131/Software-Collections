@@ -46,16 +46,21 @@ async function postApplyInfo() {
         const ssl = document.getElementById("ssl").value;
 		data = {topic, tags, description, name, docker_image, internal_port, ram, cpu, disk, domain, env, volumes, ssl, set_public};
     }
-    // post data
-    let result = await axios.post('/api/apply/info', data);
-    result = result.data;
-    if (result.suc == true) {
-		alert("申請已成功送出，若成功會再寄信告知");
-		window.location.href = "/main";
-    }
-    else {
-		alert("申請無法正確送出" + result.msg);
-    }
+	try {
+    	// post data
+    	let result = await axios.post('/api/apply/info', data);
+    	result = result.data;
+    	if (result.suc == true) {
+			alert("申請已成功送出，若成功會再寄信告知");
+			window.location.href = "/main";
+    	}
+    	else {
+			alert("申請無法正確送出" + result.msg);
+    	}
+	}
+	catch(e) {
+		alert("申請無法正確送出" + e.response.data.msg);
+	}	
 }
 
 async function postApplyFile() {

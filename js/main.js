@@ -51,17 +51,22 @@ async function deleteSoftware(software_id, external_port) {
     const confirm_content = `是否確定刪除軟體編號：${software_id} 的軟體？\n注意，會連 container 和 domain 一併刪除。`;
     const result = confirm(confirm_content);
     if (result) {
-	const data = {software_id, external_port};
-        const result = await axios.delete("/api/software", { data: data });
-	if (result.data.suc) {
-	    alert("刪除成功");
+		const data = {software_id, external_port};
+		try {
+        	const result = await axios.delete("/api/software", { data: data });
+			if (result.data.suc) {
+	    		alert("刪除成功");
+			}
+			else {
+	    		alert("刪除失敗，" + result.data.msg);
+			}
+			// reload the page to refresh the new software collections
+			window.location.reload();
+    	}
+		catch(e) {
+			alert("刪除失敗", e.response.data.msg);
+		}
 	}
-	else {
-	    alert("刪除失敗，" + result.data.msg);
-	}
-	// reload the page to refresh the new software collections
-	window.location.reload();
-    }
 }
 
 async function getMySoftwareCollections() {
@@ -72,15 +77,20 @@ async function getMySoftwareCollections() {
 async function updateSoftwarePublic(software_id) {
     const set_public = document.getElementById(`select_set_public_${software_id}`).value;
     if (confirm(`確定將軟體編號 ${software_id} 設為 ${set_public == true ? '公開' : '不公開'}`)) {
-	const data = {software_id, set_public}
-	const res = await axios.put("/api/software/public", { data });
-	if (res.data.suc) {
-            alert("更新成功！");
-	}
-	else {
-            alert("更新失敗！");
-        }
-	location.reload();
+		const data = {software_id, set_public}
+		try {
+			const res = await axios.put("/api/software/public", { data });
+			if (res.data.suc) {
+            	alert("更新成功！");
+			}
+			else {
+            	alert("更新失敗！");
+        	}
+			location.reload();
+		}
+		catch(e) {
+			alert("更新失敗", e.response.data.msg);
+		}
     }
 }
 

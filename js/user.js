@@ -51,39 +51,47 @@ async function postHeadshot() {
     const formData = new FormData();
     const imagefile = document.querySelector('#headshot_upload');
     formData.append("image", imagefile.files[0]);
-    const result = await axios.post('/api/user/headshot', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    });
+	try {
+    	const result = await axios.post('/api/user/headshot', formData, {
+        	headers: {
+            	'Content-Type': 'multipart/form-data'
+        	}
+    	});
     
-    console.log(result.data);
-    if (result.data.suc == true) {
-	// successfully update headshot
-	alert("更新照片成功");
-    }
-    else {
-	alert("更新照片失敗", result.data.msg);
-    }
-    // reload the page to refresh the new data
-    window.location.reload();
+    	if (result.data.suc == true) {
+			// successfully update headshot
+			alert("更新照片成功");
+    	}
+    	else {
+			alert("更新照片失敗", result.data.msg);
+    	}
+    	// reload the page to refresh the new data
+    	window.location.reload();
+	}
+	catch(e) {
+		alert("更新照片失敗", e.response.data.msg);
+	}
 }
 
 // update the email
 async function postEmail() {
     const email = document.getElementById("email_upload").value;
     data = {email};
-    let result = await axios.post('/api/user/email', data);
-    result = result.data;
-    console.log(result);
-    if (result.suc == true) {
-	alert("更新 email 成功");
-    }
-    else {
-	alert("更新 email 失敗" + result.msg);
-    }
-    // reload the page to refresh the new data
-    window.location.reload();
+	try {
+    	let result = await axios.post('/api/user/email', data);
+    	result = result.data;
+    	if (result.suc == true) {
+			alert("更新 email 成功");
+    	}
+    	else {
+			alert("更新 email 失敗" + result.msg);
+    	}
+    	// reload the page to refresh the new data
+    	window.location.reload();
+	}	
+	catch(e) {
+		alert("更新 email 失敗" + e.response.data.msg);
+	}	
 }
 
 showSpecifyUserInfo();

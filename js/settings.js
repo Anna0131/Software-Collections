@@ -5,15 +5,20 @@ async function submit() {
     const account = document.getElementById("account").value;
     const password = document.getElementById("password").value;
     const data = {type, total_credit, name, account, password};
-    let suc_account = await axios.post('/api/settings', data);
-    suc_account = suc_account.data;
-    if (suc_account.suc) {
-	alert("新增成功");
-    }
-    else {
-	alert(`新增失敗：${suc_account.msg}`);
-    }
-    window.location.reload();
+	try {
+    	let suc_account = await axios.post('/api/settings', data);
+    	suc_account = suc_account.data;
+    	if (suc_account.suc) {
+			alert("新增成功");
+    	}
+    	else {
+			alert(`新增失敗：${suc_account.msg}`);
+    	}
+    	window.location.reload();
+	}
+	catch(e) {
+		alert("新增失敗", e.response.data.msg);
+	}
 }
 
 async function updateDockerSpec() {
@@ -23,15 +28,20 @@ async function updateDockerSpec() {
     const disk = document.getElementById("disk").value;
     const port = document.getElementById("port").value;
     const data = {ram, cpu, disk, port};
-    // post data
-    const result = await axios.post("/api/settings/dockerSpec", data);
-    if (result.data.suc) {
-	alert("更新成功！");
-    }
-    else {
-	alert("更新失敗！");
-    }
-    window.location.reload();
+	try {
+    	// post data
+    	const result = await axios.post("/api/settings/dockerSpec", data);
+    	if (result.data.suc) {
+			alert("更新成功！");
+    	}
+    	else {
+			alert("更新失敗！");
+    	}
+    	window.location.reload();
+	}
+	catch(e) {
+		alert("更新失敗", e.response.data.msg);
+	}
 }
 
 async function showCurDockerSpec() {
@@ -60,14 +70,19 @@ async function updateMaxApplicationNums() {
     // update maximum numbers of limitation of application in a day
     const max_nums = document.getElementById("max_application_nums").value;
     const data = {max_nums};
-    const result = await axios.post("/api/settings/max_application_nums", data);
-    if (result.data.suc) {
-	alert("更新成功！");
-    }
-    else {
-	alert("更新失敗！");
-    }
-    window.location.reload();
+	try {
+    	const result = await axios.post("/api/settings/max_application_nums", data);
+    	if (result.data.suc) {
+			alert("更新成功！");
+    	}
+    	else {
+			alert("更新失敗！");
+    	}
+    	window.location.reload();
+	}
+	catch(e) {
+		alert("更新失敗", e.response.data.msg);
+	}
 }
 
 setUserInfo();
