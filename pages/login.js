@@ -93,6 +93,8 @@ const login_page_html = `<style>
     </head>
 		`
 
+const login_page_bottom_refs = '<a href="/tutorial">系統文件</a><br/><a href="mailto:tommy50508@gmail.com,s109241047@mail1.ncnu.edu.tw">管理員</a>';
+
 router.get('/sso', async function(req, res) {
 	try {
     	const url = "https://sso.ncnu.edu.tw/login";
@@ -127,7 +129,7 @@ router.get('/sso', async function(req, res) {
 		const xsrf = JSON.parse(JSON.stringify(Object.values(cookies)[1])).value;
     	await browser.close();
 		// response a html with above infos
-    	res.send(`${login_page_html}<div><label>請使用 <a href='https://sso.ncnu.edu.tw'>NCNU SSO</a> 帳號登入</label><br/>帳號：<input id='account'/><br/>密碼：<input type='password' id='password'/><br/>驗證碼：<input id='captcha'/><br/></div><img style='width:10%' src="data:image/png;base64,${screenshot}"/><br/><div style='display:none'><div id='csrf'>${csrf}</div><div id='xsrf'>${xsrf}</div><div id = 'session'>${session}</div></div><button onclick='submitLogin()'>送出</button><script src = "/js/sso_login.js"></script><script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js'></script>`); // 回傳圖片
+    	res.send(`${login_page_html}<div><label>請使用 <a href='https://sso.ncnu.edu.tw'>NCNU SSO</a> 帳號登入</label><br/>帳號：<input id='account'/><br/>密碼：<input type='password' id='password'/><br/>驗證碼：<input id='captcha'/><br/></div><img style='width:10%' src="data:image/png;base64,${screenshot}"/><br/><div style='display:none'><div id='csrf'>${csrf}</div><div id='xsrf'>${xsrf}</div><div id = 'session'>${session}</div></div><button onclick='submitLogin()'>送出</button><br/><br/>${login_page_bottom_refs}<script src = "/js/sso_login.js"></script><script src = 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js'></script>`); // 回傳圖片
 	}
 	catch(e) {
 		console.error(e);
