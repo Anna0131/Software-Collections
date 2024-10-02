@@ -1,10 +1,10 @@
 function showOrHideLoading() {
 	const spinner = document.getElementsByClassName("spinner")[0];
 	if (spinner.style.display === 'none' || spinner.style.display === '') {
-    	spinner.style.display = 'block'; // 显示加载动画
+    	spinner.style.display = 'block';
     }
 	else {
-        spinner.style.display = 'none';  // 隐藏加载动画
+        spinner.style.display = 'none';
     }
 }
 
@@ -24,8 +24,10 @@ async function submit() {
         else {
 	    	alert(suc_login.authen_result);
         }
+		showOrHideLoading();
     }
     catch(e) {
        	alert("login failed " + e.response.data.authen_result);
+		showOrHideLoading();
     }
 }

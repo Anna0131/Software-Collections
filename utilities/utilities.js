@@ -22,6 +22,42 @@ module.exports = {
 
     // shared function
 
+    loginAuthenticationSSO: function(account, password, xsrf, session, captcha, csrf) {
+        return new Promise((resolve, reject) => { // 包裝成 Promise
+            const spawn = require("child_process").spawn;
+            const pythonScript = path.join(__dirname, 'sso_login.py'); // path/to/catch.py
+			const pythonProcess = spawn('python3', [pythonScript, account, password, xsrf, session, captcha, csrf]);
+
+            //console.log(`account: ${account}`);
+            //console.log(`password: ${password}`);
+
+            pythonProcess.stdout.on('data', (data) => {
+				data = data.toString().slice(0, -1); // remove the last char 
+                if (data === 'login falied') {
+                    resolve(false); // 登入失敗，解析 Promise 為 True
+                } else {
+                    resolve(data.toString().trim()); // 登入成功
+                }
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                console.error(`stderr: ${data.toString()}`);
+            });
+
+            pythonProcess.on('exit', (code) => {
+                //console.log(`child process exited with code ${code}`);
+                if (code !== 0) {
+                    reject(new Error(`child process exited with code ${code}`)); // 非 0 退出代碼表示錯誤
+                }
+            });
+
+            pythonProcess.on('error', (err) => {
+                console.error(err);
+                reject(err); // 子進程啟動失敗
+            });
+        });
+    },
+
     loginAuthentication: function(account, password) {
         return new Promise((resolve, reject) => { // 包裝成 Promise
             const spawn = require("child_process").spawn;
@@ -32,7 +68,7 @@ module.exports = {
             //console.log(`password: ${password}`);
 
             pythonProcess.stdout.on('data', (data) => {
-		data = data.toString().slice(0, -1); // remove the last char 
+			data = data.toString().slice(0, -1); // remove the last char 
                 if (data === 'login falied') {
                     resolve(false); // 登入失敗，解析 Promise 為 True
                 } else {

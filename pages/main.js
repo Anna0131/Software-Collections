@@ -9,7 +9,7 @@ router.get('/', async function(req, res) {
     	    res.sendFile(util.getParentPath(__dirname) + '/templates/main.html');  //回應靜態文件
         }
         else {
-	    res.redirect("/login");
+	    	res.redirect("/login/sso");
         }
     }
     catch(e) {

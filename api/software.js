@@ -41,7 +41,7 @@ function createContainer(docker_image, internal_port, ram, cpu, disk, env, volum
     internal_port = internal_port == null ? "'null'" : internal_port;
     env = env == 'null' || env == null ? 'null' : "'" + env + "'";
     volumes = volumes == 'null' || volumes == null ? 'null' : "'" + volumes + "'";
-    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes, user_id], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, docker_image, internal_port, ram, cpu, disk, env, volumes, user_id]);
 
         return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -538,7 +538,7 @@ router.get('/disagreement', async function(req, res) {
 function deleteContainer(container_name, user_id) {
             const spawn = require("child_process").spawn;
     	    const pythonScript = util.getParentPath(__dirname) + "/utilities/deleteContainer.py"; 
-            const pythonProcess = spawn('python3', [pythonScript, container_name, user_id], {shell: true});
+            const pythonProcess = spawn('python3', [pythonScript, container_name, user_id]);
 
             //console.log(`account: ${account}`);
             //console.log(`password: ${password}`);
@@ -632,7 +632,7 @@ async function getContainerImage(container_name, user_id) {
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "image";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id]);
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -678,7 +678,7 @@ async function getContainerLog(container_name, user_id) {
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "logs";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id]);
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 
@@ -840,7 +840,7 @@ async function getContainerResourceUsage(container_name, user_id) {
     const pythonScript = util.getParentPath(__dirname) + "/utilities/getContainerInfo.py"; 
     const info_type = "resource_usage";
     const spawn = require("child_process").spawn;
-    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id], {shell: true});
+    const pythonProcess = spawn('python3', [pythonScript, container_name, info_type, user_id]);
 
             return new Promise((resolve, reject) => { // 包裝成 Promise
 

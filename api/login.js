@@ -171,4 +171,55 @@ router.post('/', async function(req, res) { // 注意這裡加了 async
     }    
 });
 
+// process login request
+router.post('/sso', async function(req, res) { // 注意這裡加了 async
+    try {
+        let suc = true;
+        const account = req.body.account;
+        const password = req.body.password;
+        const xsrf = req.body.xsrf;
+        const session = req.body.session;
+        const captcha = req.body.captcha;
+        const csrf = req.body.csrf;
+
+		// check if this ip exceed the limitation of login failure in a period of time
+		const is_blocked = await blockBruteForce(req.ip);
+		if (is_blocked) {
+	    	suc = false;
+	    	res.status(403).json({suc : suc, authen_result : "超過一段時間內限制的失敗次數"});
+		}
+		else {
+        	let authen_result = await util.loginAuthenticationSSO(account, password, xsrf, session, captcha, csrf);
+			console.log(authen_result);
+        	if (authen_result != "login failed") {
+	        	// login successfully
+	        	const user_id = await insertUser(account, authen_result); // insert into user table if this account not existed
+            	data = {uid : user_id};
+            	const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
+            	res.cookie("token", token);
+        	}
+        	else {
+	        	// if this account can not login on moodle, then check if this account is additionally added by root
+	        	const user_id = await checkAddingUser(account, password);
+	        	if (user_id) {
+	            	// login successfully
+	            	authen_result = user_id;
+                    data = {uid : user_id};
+                	const token = jwt.sign({ data, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, util.jwt_key);
+                    res.cookie("token", token);
+	        	}
+	        	else {
+	            	suc = false;
+	        	}	
+        	}
+            res.json({suc : suc, authen_result : authen_result});
+	    	insertLoginRecord(suc, account, req.ip);
+		}
+    }
+    catch (e) {
+        console.error(e);
+		res.status(500).json({msg : "Internal Server Error"});
+    }    
+});
+
 module.exports = router;
