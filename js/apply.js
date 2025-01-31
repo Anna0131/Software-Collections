@@ -52,6 +52,7 @@ async function postApplyInfo() {
     	result = result.data;
     	if (result.suc == true) {
 			alert("申請已成功送出，若成功會再寄信告知");
+			await uploadFile(result.software_id);
 			window.location.href = "/main";
     	}
     	else {
@@ -107,6 +108,39 @@ async function setDockerSpec() {
     }
     else {
 	alert("Error get the docker spec");
+    }
+}
+
+// upload file
+async function uploadFile(software_id) {
+    const formData = new FormData();
+    const fileInput = document.querySelector('#file_upload'); // 取得 input[type="file"]
+    
+    if (!fileInput.files.length) {
+        console.log("沒有要上傳的檔案");
+        return;
+    }
+
+    formData.append("file", fileInput.files[0]);
+	formData.append("software_id", software_id);
+
+    try {
+        const result = await axios.post('/api/software/file', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (result.data.suc === true) {
+            console.log("檔案上傳成功");
+        } else {
+            alert("檔案上傳失敗: " + result.data.msg);
+        }
+
+        // 重新載入頁面以顯示最新狀態
+        window.location.reload();
+    } catch (e) {
+        alert("檔案上傳失敗: " + (e.response?.data?.msg || e.message));
     }
 }
 

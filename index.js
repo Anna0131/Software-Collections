@@ -53,6 +53,7 @@ app.use("/api/refs", require("./api/refs.js"));
 app.use("/api/login", require("./api/login.js"));
 app.use("/api/settings", require("./api/settings.js"));
 app.use("/api/apply", require("./api/apply.js"));
+app.use("/api/course", require("./api/course.js"));
 // static files
 app.use('/js', express.static('./js'));
 app.use('/css', express.static('./css'));

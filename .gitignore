@@ -2,4 +2,6 @@ media/
 !media/public/
 !media/public/**
 !media/default.png
+files/
+!files/.gitkeep
 node_modules/

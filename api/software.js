@@ -3,6 +3,7 @@ const router = require("express").Router();
 const util = require("./../utilities/utilities.js");
 const sendEmail = require("./../utilities/sendEmail.js");
 const jwt = require('jsonwebtoken');
+const fs = require("fs");
 
 function informApplicantAndAdmin(external_port, software_id, user_info, container_name) {
     // send the email to inform the agreement of project to the person who applied this project
@@ -1011,6 +1012,88 @@ router.put("/public", async function(req, res) {
     catch(e) {
         console.error(e);
 	res.status(500).json({msg : "Internal Server Error"});
+    }
+});
+
+// upload file
+router.post('/file', async function(req, res) {
+    try {
+	const result = await util.authenToken(req.cookies.token);
+	if (result) {
+	    const software_id = req.body.software_id;
+	    const file = req.files.file;
+	    let suc = false; // whether have set the image of headshot successfully
+	    if (file != undefined) {
+	        const file_temp_path = file.tempFilePath; // path of temp file uploaded by user
+			const file_directory = `/files/software_id_${software_id}`;
+			const file_path = util.getParentPath(__dirname) + `${file_directory}/${file.name}`; // the path which actually store img of headshot
+			try {
+	            // create directory if not existed
+		    	if (!fs.existsSync(util.getParentPath(__dirname) + `${file_directory}`)){
+                    fs.mkdirSync(util.getParentPath(__dirname) + `${file_directory}`);
+                }
+		    	fs.copyFileSync(file_temp_path, file_path);
+		    	suc = true;
+			}
+			catch (e) {
+		    	console.error(e);
+			}
+			fs.unlinkSync(file_temp_path); // remove the temp file
+	    }
+	    if (suc) {
+	        res.json({suc});
+	    }
+	    else {
+	        res.status(500).json({suc});
+	    }
+        }
+        else {
+            res.status(401).json({msg : "Unauthorized"});
+        }
+    }
+    catch(e) {
+        console.error(e);
+		res.status(500).json({msg : "Internal Server Error"});
+    }
+});
+
+// get file info or download it.
+router.get('/file', async function(req, res) {
+    try {
+		const result = await util.authenToken(req.cookies.token);
+		if (result) {
+	    	const download = req.query.download;
+			const software_id = req.query.software_id;
+			const file_directory = `/files/software_id_${software_id}`;
+			const file_path = util.getParentPath(__dirname) + `${file_directory}`; // the path which actually store img of headshot
+			// Check if the file exists
+    		fs.readdir(file_path, (err, files) => {
+        		if (err || files.length === 0) {
+					if (download) {
+            			res.status(404).json({ success: false, msg: 'File not found' });
+					}
+					else {
+						res.json({file_existed: false});
+					}
+        		}
+				else {
+        			// File existed
+					if (download == "true") {
+        				res.download(`${file_path}/${files[0]}`);
+					}
+					else {
+						res.json({file_existed: true, filename: files[0]});
+					}
+				}
+    		});
+    	}
+    	else {
+        	res.status(401).json({msg : "Unauthorized"});
+    	}
+	}
+    catch(e) {
+        console.error(e);
+		res.status(500).json({msg : "Internal Server Error"});
     }
 });
 

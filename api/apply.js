@@ -197,7 +197,7 @@ router.post('/info', async function(req, res) {
         	receivers = ["s109213059@mail1.ncnu.edu.tw", "tommy50508@gmail.com"];
         	content = mkContent(name, topic, tags, description, docker_image, domain, datetime, software_id, internal_port, ram, cpu, disk, env, volumes);
         	sendEmail.send(receivers, topic, content);
-	    	res.json({suc : true});
+	    	res.json({suc : true, software_id : software_id.toString()});
 	    }
 	    catch(e) {
 		console.log(e);

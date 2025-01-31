@@ -26,3 +26,7 @@ sudo n stable
 # install pip3 & required packages
 sudo apt-get install python3-pip
 sudo pip3 install bs4
+
+# install c library for puppteer
+sudo apt-get install -y libasound2
+sudo apt-get install -y libgbm1

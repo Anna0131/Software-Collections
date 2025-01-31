@@ -1,6 +1,12 @@
 CREATE DATABASE IF NOT EXISTS `software_collections`;
 USE software_collections;
 
+create table course (
+    `semester` int(4) UNSIGNED NOT NULL,
+    `info` varchar(20) NOT NULL ,
+    PRIMARY KEY (`semester`) USING BTREE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 create table role (
     `role_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` varchar(30) NOT NULL ,

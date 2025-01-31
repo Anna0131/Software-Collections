@@ -154,9 +154,23 @@ async function showSoftwareCollections() {
 	}
     }
     else {
-	// failed to get the data of softwares
-	alert("failed to get the info of software");
+		// failed to get the data of softwares
+		alert("failed to get the info of software");
     }
+
+	// set file info if there have any file that can be downloaded
+	await setFileInfo();
+}
+
+async function setFileInfo() {
+	const res = await axios.get(`/api/software/file?download=false&software_id=${software_id}`);
+	if (res.data.filename != undefined) {
+		document.getElementById("file_download").innerHTML = `<br/><br/>有一檔案 <b>${res.data.filename}</b> 可供下載：<button onclick="downloadFile()">下載</button>`;
+	}
+}
+
+async function downloadFile() {
+	window.open(`/api/software/file?download=true&software_id=${software_id}`);
 }
 
 async function getBulletin() {
