@@ -2,8 +2,8 @@ const c = require('config');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const jwt_key = "goodjwtkey";
-const system_url = "http://localhost";
-const system_ip = "163.22.17.116";
+const system_url = "https://sw-registry.im.ncnu.edu.tw";
+const system_ip = "163.22.17.200";
 const db = require("mariadb");
 // create pool
 const pool = db.createPool({

@@ -31,7 +31,13 @@
 
 
 ## 安裝與設定:
-### Usagw
+### Develop Env
+- `vi utilities/utilities.js`
+```=
+const system_url = <your-url>;
+const system_ip = <your-ip>;
+```
+### Usage
 - `npm install pm2 -g`
 - `pm2 start npm --name "software_collections" -- start`
   
