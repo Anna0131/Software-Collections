@@ -27,7 +27,8 @@ app.use(cors());
 // Use temp files instead of memory for managing the upload process.
 app.use(fileupload({
     useTempFiles : true,
-    tempFileDir : '/tmp/'
+    tempFileDir : '/tmp/',
+	limits: { fileSize: 512 * 1024 * 1024 } // 512MB limit
 }));
 app.set('trust proxy', true); // trust first proxy to get the client IP address
 
