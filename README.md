@@ -1,14 +1,14 @@
-# 軟體庫-作品集 系統
+# 軟體庫/作品集 系統
 ##### 系統網址：https://sw-registry.im.ncnu.edu.tw/login/sso
 ##### 系統文件說明：https://hackmd.io/QscYPE9jRGe5qd3W6Hn5rQ?view
 
-## 系統功能：
+## Features
 - 爬蟲 NCNU SSO 網站 的 captcha, csrf-token，實現第三方登入
 - 方便同學欲部署系統時，不需和計算機中心申請VM，僅需輸入容器 image registry 及資源規格，系統便會在管理員同意後，自動部署容器到 Docker Swarm，可增加資源使用率
 - 提供網頁介面供同學監控和管理容器
 - 系辦或教授可以在此平台提出需求，請同學開發系統
 
-## 系統畫面
+## System Screenshots
 - 藉由爬蟲 NCNU SSO 的 captcha, csrf-token，實現第三方登入。使用者輸入容器規格，系統自動部署於 Docker Swarm。
   - <img width="156" alt="image" src="https://github.com/user-attachments/assets/42cdd41f-f8c4-41fa-9cdd-fc36001c2496"><img width="246" alt="image" src="https://github.com/user-attachments/assets/d3f65925-c66d-46f7-9c08-2a966c069c7f">
 
@@ -20,7 +20,7 @@
 
 
 
-## 流程
+## Workflow
 - 學生登入：學生可使用學號和密碼登入系統。
 - 填寫申請表：登入後可填寫需求和提交作品集。
 - 系統說明與 Docker 資訊：申請表附有系統使用說明和 Docker 相關資訊。
@@ -30,7 +30,7 @@
 - 展示作品集：系統將展示所有學生的作品集。
 
 
-## 安裝與設定:
+## Installation & Configuration
 ### Develop Env
 - `vi utilities/utilities.js`
 ```=
@@ -42,7 +42,7 @@ const system_ip = <your-ip>;
 - `pm2 start npm --name "software_collections" -- start`
   
 
-## 使用說明
+## User Guide
 ### 學生使用者
 訪問系統 URL。
 使用您的學號和密碼登入。
